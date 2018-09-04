@@ -46,7 +46,7 @@
             // 
             // ProcNameTextBox
             // 
-            this.ProcNameTextBox.Location = new System.Drawing.Point(297, 25);
+            this.ProcNameTextBox.Location = new System.Drawing.Point(12, 206);
             this.ProcNameTextBox.Name = "ProcNameTextBox";
             this.ProcNameTextBox.Size = new System.Drawing.Size(91, 20);
             this.ProcNameTextBox.TabIndex = 0;
@@ -55,7 +55,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(294, 9);
+            this.label1.Location = new System.Drawing.Point(9, 190);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(79, 13);
             this.label1.TabIndex = 1;
@@ -72,7 +72,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(10, 9);
+            this.label2.Location = new System.Drawing.Point(9, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(55, 13);
             this.label2.TabIndex = 3;
@@ -80,9 +80,9 @@
             // 
             // SearchButton
             // 
-            this.SearchButton.Location = new System.Drawing.Point(201, 222);
+            this.SearchButton.Location = new System.Drawing.Point(296, 189);
             this.SearchButton.Name = "SearchButton";
-            this.SearchButton.Size = new System.Drawing.Size(83, 21);
+            this.SearchButton.Size = new System.Drawing.Size(79, 39);
             this.SearchButton.TabIndex = 4;
             this.SearchButton.Text = "Search";
             this.SearchButton.UseVisualStyleBackColor = true;
@@ -90,9 +90,9 @@
             // 
             // OffsetsListView
             // 
-            this.OffsetsListView.Location = new System.Drawing.Point(12, 90);
+            this.OffsetsListView.Location = new System.Drawing.Point(12, 51);
             this.OffsetsListView.Name = "OffsetsListView";
-            this.OffsetsListView.Size = new System.Drawing.Size(274, 127);
+            this.OffsetsListView.Size = new System.Drawing.Size(363, 127);
             this.OffsetsListView.TabIndex = 6;
             this.OffsetsListView.UseCompatibleStateImageBehavior = false;
             this.OffsetsListView.DoubleClick += new System.EventHandler(this.OffsetsListView_DoubleClick);
@@ -100,7 +100,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 48);
+            this.label3.Location = new System.Drawing.Point(106, 190);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(76, 13);
             this.label3.TabIndex = 7;
@@ -108,7 +108,7 @@
             // 
             // ModuleNameTextBox
             // 
-            this.ModuleNameTextBox.Location = new System.Drawing.Point(12, 64);
+            this.ModuleNameTextBox.Location = new System.Drawing.Point(109, 206);
             this.ModuleNameTextBox.Name = "ModuleNameTextBox";
             this.ModuleNameTextBox.Size = new System.Drawing.Size(91, 20);
             this.ModuleNameTextBox.TabIndex = 8;
@@ -116,7 +116,7 @@
             // CheckAllModuleCheckBox
             // 
             this.CheckAllModuleCheckBox.AutoSize = true;
-            this.CheckAllModuleCheckBox.Location = new System.Drawing.Point(109, 64);
+            this.CheckAllModuleCheckBox.Location = new System.Drawing.Point(206, 211);
             this.CheckAllModuleCheckBox.Name = "CheckAllModuleCheckBox";
             this.CheckAllModuleCheckBox.Size = new System.Drawing.Size(80, 17);
             this.CheckAllModuleCheckBox.TabIndex = 9;
@@ -126,27 +126,27 @@
             // 
             // ProgressBar
             // 
-            this.ProgressBar.Location = new System.Drawing.Point(6, 247);
-            this.ProgressBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ProgressBar.Location = new System.Drawing.Point(12, 233);
+            this.ProgressBar.Margin = new System.Windows.Forms.Padding(2);
             this.ProgressBar.Name = "ProgressBar";
-            this.ProgressBar.Size = new System.Drawing.Size(278, 12);
+            this.ProgressBar.Size = new System.Drawing.Size(363, 12);
             this.ProgressBar.TabIndex = 10;
             // 
             // imSearchCheckbox
             // 
             this.imSearchCheckbox.AutoSize = true;
-            this.imSearchCheckbox.Location = new System.Drawing.Point(80, 225);
-            this.imSearchCheckbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.imSearchCheckbox.Location = new System.Drawing.Point(206, 189);
+            this.imSearchCheckbox.Margin = new System.Windows.Forms.Padding(2);
             this.imSearchCheckbox.Name = "imSearchCheckbox";
-            this.imSearchCheckbox.Size = new System.Drawing.Size(117, 17);
+            this.imSearchCheckbox.Size = new System.Drawing.Size(85, 17);
             this.imSearchCheckbox.TabIndex = 11;
-            this.imSearchCheckbox.Text = "Search immediately";
+            this.imSearchCheckbox.Text = "Auto Search";
             this.imSearchCheckbox.UseVisualStyleBackColor = true;
             // 
             // AddSigButton
             // 
-            this.AddSigButton.Location = new System.Drawing.Point(202, 61);
-            this.AddSigButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AddSigButton.Location = new System.Drawing.Point(292, 24);
+            this.AddSigButton.Margin = new System.Windows.Forms.Padding(2);
             this.AddSigButton.Name = "AddSigButton";
             this.AddSigButton.Size = new System.Drawing.Size(83, 21);
             this.AddSigButton.TabIndex = 12;
@@ -157,8 +157,8 @@
             // SigMaskTextBox
             // 
             this.SigMaskTextBox.Enabled = false;
-            this.SigMaskTextBox.Location = new System.Drawing.Point(192, 25);
-            this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SigMaskTextBox.Location = new System.Drawing.Point(194, 25);
+            this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.SigMaskTextBox.Name = "SigMaskTextBox";
             this.SigMaskTextBox.Size = new System.Drawing.Size(94, 20);
             this.SigMaskTextBox.TabIndex = 13;
@@ -166,7 +166,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(190, 9);
+            this.label4.Location = new System.Drawing.Point(192, 9);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(36, 13);
             this.label4.TabIndex = 14;
@@ -176,7 +176,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(598, 332);
+            this.ClientSize = new System.Drawing.Size(390, 257);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.SigMaskTextBox);
             this.Controls.Add(this.AddSigButton);
