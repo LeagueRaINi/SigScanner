@@ -72,10 +72,12 @@ namespace SigScanner.Helpers
 
         private bool IsValidMask()
         {
-            if (this.Mask != string.Empty)
-                foreach (char charr in this.Mask)
-                    if (!charr.Equals('x') && !charr.Equals('?'))
-                        return false;
+            if (this.Mask == string.Empty)
+                return false;
+
+            foreach (char charr in this.Mask)
+                if (!charr.Equals('x') && !charr.Equals('?'))
+                    return false;
 
             return true;
         }

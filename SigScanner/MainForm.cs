@@ -12,9 +12,9 @@ using System.Windows.Forms;
 
 namespace SigScanner
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -44,17 +44,16 @@ namespace SigScanner
 
         private void SignatureTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (((TextBox) sender).Text.Contains(@"\x"))
-                patternTextBox.Enabled = true;
-            else
-                patternTextBox.Enabled = false;
+            var textBox = sender as CheckBox;
+
+            patternTextBox.Enabled = textBox.Text.Contains(@"\x");
         }
 
         private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            var cbox = sender as CheckBox;
+            var checkNox = sender as CheckBox;
 
-            ModuleNameTextBox.Enabled = !cbox.Checked;
+            ModuleNameTextBox.Enabled = !checkNox.Checked;
         }
 
         private void addButton_Click(object sender, EventArgs e)
@@ -67,7 +66,7 @@ namespace SigScanner
 
         private void ProcessNameTextBox_TextChanged(object sender, EventArgs e)
         {
-            var textbox = sender as TextBox;
+            var textBox = sender as TextBox;
 
             // TODO: check for process' existence
         }
