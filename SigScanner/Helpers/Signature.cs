@@ -71,7 +71,7 @@ namespace SigScanner.Helpers
 
         public bool IsValid()
         {
-            return this.Type != SigType.UNKNOWN;
+            return this.Type != SigType.UNKNOWN && this.Bytes != null && this.Bytes.Any();
         }
 
         private bool IsValidMask()
