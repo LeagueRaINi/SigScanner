@@ -80,6 +80,7 @@ namespace SigScanner
             {
                 // Module name at the beginning
                 int endIndex = address.IndexOf('"', index + 1);
+
                 if (endIndex == -1)
                     throw new ArgumentException("Invalid module name. Could not find matching \"");
 

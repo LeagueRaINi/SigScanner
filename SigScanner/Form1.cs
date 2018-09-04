@@ -64,5 +64,12 @@ namespace SigScanner
                 // TODO
             }
         }
+
+        private void ProcessNameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var textbox = sender as TextBox;
+
+            // TODO: check for process' existence
+        }
     }
 }
