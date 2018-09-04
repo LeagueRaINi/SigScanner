@@ -195,6 +195,7 @@
             this.Name = "MainForm";
             this.Text = "Simple SigScanner";
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.MouseEnter += new System.EventHandler(this.MainForm_MouseEnter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

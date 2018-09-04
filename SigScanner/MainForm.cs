@@ -51,9 +51,9 @@ namespace SigScanner
 
         private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            var checkNox = sender as CheckBox;
+            var checkBox = sender as CheckBox;
 
-            ModuleNameTextBox.Enabled = !checkNox.Checked;
+            ModuleNameTextBox.Enabled = !checkBox.Checked;
         }
 
         private void AddSigButton_Click(object sender, EventArgs e)
@@ -69,6 +69,12 @@ namespace SigScanner
             var textBox = sender as TextBox;
 
             // TODO: check for process' existence
+        }
+
+        // meme
+        private void MainForm_MouseEnter(object sender, EventArgs e)
+        {
+            ProgressBar.Value = new Random().Next(0, 100);
         }
     }
 }
