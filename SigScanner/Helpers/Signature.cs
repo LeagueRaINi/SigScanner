@@ -69,6 +69,11 @@ namespace SigScanner.Helpers
             MessageBox.Show("Unknown Pattern format", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+        public bool IsValid()
+        {
+            return this.Type != SigType.UNKNOWN;
+        }
+
         private bool IsValidMask()
         {
             if (this.Mask == string.Empty)

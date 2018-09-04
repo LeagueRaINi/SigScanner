@@ -56,11 +56,27 @@ namespace SigScanner.Helpers
             Natives.Imports.CloseHandle(this.ProcessHandle);
         }
 
+        public ProcessModule GetModule(string moduleName)
+        {
+            if (!this.IsAlive())
+            {
+                MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null;
+            }
+
+            foreach (ProcessModule module in this.Process.Modules)
+                if (module.ModuleName.ToLower().Equals(moduleName.ToLower()))
+                    return module;
+
+            MessageBox.Show($"Failed to find Module: {moduleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return null;
+        }
+
         public bool ReadMemory(IntPtr address, int size, out byte[] bytes)
         {
             bytes = new byte[size];
 
-            if (this.IsAlive())
+            if (!this.IsAlive())
             {
                 MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;

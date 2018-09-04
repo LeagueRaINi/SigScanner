@@ -19,7 +19,7 @@ namespace SigScanner
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             //
         }
@@ -42,11 +42,11 @@ namespace SigScanner
             Clipboard.SetText(selectedItemsSubItems[1].Text);
         }
 
-        private void SignatureTextBox_TextChanged(object sender, EventArgs e)
+        private void SigTextBox_TextChanged(object sender, EventArgs e)
         {
-            var textBox = sender as CheckBox;
+            var textBox = sender as TextBox;
 
-            patternTextBox.Enabled = textBox.Text.Contains(@"\x");
+            SigMaskTextBox.Enabled = textBox.Text.Contains(@"\x");
         }
 
         private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -56,7 +56,7 @@ namespace SigScanner
             ModuleNameTextBox.Enabled = !checkNox.Checked;
         }
 
-        private void addButton_Click(object sender, EventArgs e)
+        private void AddSigButton_Click(object sender, EventArgs e)
         {
             if (imSearchCheckbox.Checked)
             {
@@ -64,7 +64,7 @@ namespace SigScanner
             }
         }
 
-        private void ProcessNameTextBox_TextChanged(object sender, EventArgs e)
+        private void ProcNameTextBox_TextChanged(object sender, EventArgs e)
         {
             var textBox = sender as TextBox;
 
