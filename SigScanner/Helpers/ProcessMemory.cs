@@ -31,16 +31,26 @@ namespace SigScanner.Helpers
             this.CloseHandle();
         }
 
+        public bool CanRPM()
+        {
+            return this.IsAlive() && this.HasHandle();
+        }
+
         public bool IsAlive()
         {
             return this.Process != null && !this.Process.HasExited;
+        }
+
+        public bool HasHandle()
+        {
+            return this.ProcessHandle != null && this.ProcessHandle != IntPtr.Zero;
         }
 
         public void CloseHandle()
         {
             if (!this.IsAlive())
                 return;
-            if (this.ProcessHandle == null)
+            if (!this.HasHandle())
                 return;
 
             Natives.Imports.CloseHandle(this.ProcessHandle);
@@ -56,7 +66,7 @@ namespace SigScanner.Helpers
                 return false;
             }
 
-            if (this.ProcessHandle == IntPtr.Zero)
+            if (!this.HasHandle())
             {
                 MessageBox.Show("Process Handle is invalid", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
