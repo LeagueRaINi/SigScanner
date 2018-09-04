@@ -47,5 +47,12 @@ namespace SigScanner
             if (((TextBox)sender).Text.Contains(@"\x"))
                 MessageBox.Show("miep!");
         }
+
+        private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            var cbox = sender as CheckBox;
+
+            ModuleNameTextBox.Enabled = !cbox.Checked;
+        }
     }
 }
