@@ -30,6 +30,7 @@ namespace SigScanner.Helpers
             this.Mask = mask.ToLower();
             this.ModuleName = moduleName;
             this.Type = SigType.UNKNOWN;
+            this.Bytes = new List<byte>();
 
             var idaMatches = _idaRegex.Matches(this.Pattern);
             if (idaMatches.Count > this.Pattern.Length / 3)
@@ -38,7 +39,6 @@ namespace SigScanner.Helpers
                 if (splitPattern.Count() == idaMatches.Count)
                 {
                     this.Type = SigType.IDA;
-                    this.Bytes = new List<byte>();
 
                     foreach(var hex in splitPattern)
                         this.Bytes.Add(hex.Equals("?") || hex.Equals("??")
@@ -55,11 +55,10 @@ namespace SigScanner.Helpers
                 if (IsValidMask())
                 {
                     this.Type = SigType.CODE;
-                    this.Bytes = new List<byte>();
 
-                    var parsed = this.Pattern.Replace("\\x", "");
+                    var strippedPattern = this.Pattern.Replace("\\x", "");
                     for (int i = 0; i < this.Mask.Length; i++)
-                        this.Bytes.Add(Convert.ToByte(parsed.Substring(i * 2, 2), 16));
+                        this.Bytes.Add(Convert.ToByte(strippedPattern.Substring(i * 2, 2), 16));
 
                     return;
                 }
