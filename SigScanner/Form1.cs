@@ -44,8 +44,10 @@ namespace SigScanner
 
         private void SignatureTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (((TextBox)sender).Text.Contains(@"\x"))
-                MessageBox.Show("miep!");
+            if (((TextBox) sender).Text.Contains(@"\x"))
+                patternTextBox.Enabled = true;
+            else
+                patternTextBox.Enabled = false;
         }
 
         private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -53,6 +55,14 @@ namespace SigScanner
             var cbox = sender as CheckBox;
 
             ModuleNameTextBox.Enabled = !cbox.Checked;
+        }
+
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            if (imSearchCheckbox.Checked)
+            {
+                // TODO
+            }
         }
     }
 }

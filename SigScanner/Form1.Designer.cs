@@ -38,13 +38,15 @@
             this.ModuleNameTextBox = new System.Windows.Forms.TextBox();
             this.CheckAllModuleCheckBox = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.imSearchCheckbox = new System.Windows.Forms.CheckBox();
+            this.addButton = new System.Windows.Forms.Button();
+            this.patternTextBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ProcessNameTextBox
             // 
-            this.ProcessNameTextBox.Location = new System.Drawing.Point(24, 48);
+            this.ProcessNameTextBox.Location = new System.Drawing.Point(594, 48);
             this.ProcessNameTextBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.ProcessNameTextBox.Name = "ProcessNameTextBox";
             this.ProcessNameTextBox.Size = new System.Drawing.Size(178, 31);
@@ -53,7 +55,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 17);
+            this.label1.Location = new System.Drawing.Point(588, 17);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(158, 25);
@@ -62,7 +64,7 @@
             // 
             // SignatureTextBox
             // 
-            this.SignatureTextBox.Location = new System.Drawing.Point(218, 48);
+            this.SignatureTextBox.Location = new System.Drawing.Point(25, 48);
             this.SignatureTextBox.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.SignatureTextBox.Name = "SignatureTextBox";
             this.SignatureTextBox.Size = new System.Drawing.Size(350, 31);
@@ -72,7 +74,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(212, 17);
+            this.label2.Location = new System.Drawing.Point(19, 17);
             this.label2.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(110, 25);
@@ -103,7 +105,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(24, 92);
+            this.label3.Location = new System.Drawing.Point(19, 92);
             this.label3.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(151, 25);
@@ -137,32 +139,53 @@
             this.progressBar1.Size = new System.Drawing.Size(556, 23);
             this.progressBar1.TabIndex = 10;
             // 
-            // checkBox1
+            // imSearchCheckbox
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(161, 433);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(232, 29);
-            this.checkBox1.TabIndex = 11;
-            this.checkBox1.Text = "Search immediately";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.imSearchCheckbox.AutoSize = true;
+            this.imSearchCheckbox.Location = new System.Drawing.Point(161, 433);
+            this.imSearchCheckbox.Name = "imSearchCheckbox";
+            this.imSearchCheckbox.Size = new System.Drawing.Size(232, 29);
+            this.imSearchCheckbox.TabIndex = 11;
+            this.imSearchCheckbox.Text = "Search immediately";
+            this.imSearchCheckbox.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // addButton
             // 
-            this.button1.Location = new System.Drawing.Point(405, 118);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(166, 41);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Add";
-            this.button1.UseVisualStyleBackColor = true;
+            this.addButton.Location = new System.Drawing.Point(405, 118);
+            this.addButton.Name = "addButton";
+            this.addButton.Size = new System.Drawing.Size(166, 41);
+            this.addButton.TabIndex = 12;
+            this.addButton.Text = "Add";
+            this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.Click += new System.EventHandler(this.addButton_Click);
+            // 
+            // patternTextBox
+            // 
+            this.patternTextBox.Enabled = false;
+            this.patternTextBox.Location = new System.Drawing.Point(384, 48);
+            this.patternTextBox.Name = "patternTextBox";
+            this.patternTextBox.Size = new System.Drawing.Size(184, 31);
+            this.patternTextBox.TabIndex = 13;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(379, 17);
+            this.label4.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(81, 25);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "Pattern";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1196, 638);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.patternTextBox);
+            this.Controls.Add(this.addButton);
+            this.Controls.Add(this.imSearchCheckbox);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.CheckAllModuleCheckBox);
             this.Controls.Add(this.ModuleNameTextBox);
@@ -195,8 +218,10 @@
         private System.Windows.Forms.TextBox ModuleNameTextBox;
         private System.Windows.Forms.CheckBox CheckAllModuleCheckBox;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox imSearchCheckbox;
+        private System.Windows.Forms.Button addButton;
+        private System.Windows.Forms.TextBox patternTextBox;
+        private System.Windows.Forms.Label label4;
     }
 }
 
