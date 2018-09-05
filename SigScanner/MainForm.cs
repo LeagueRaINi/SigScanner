@@ -65,6 +65,7 @@ namespace SigScanner
             var treeView = sender as TreeView;
 
             Clipboard.SetText(treeView.SelectedNode.Text);
+            modulesToolTip.Show("Copied to clipboard!", ActiveForm, PointToClient(MousePosition), 500);
         }
 
         private void SigTextBox_TextChanged(object sender, EventArgs e)
