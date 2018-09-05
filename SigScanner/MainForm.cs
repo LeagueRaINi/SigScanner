@@ -23,8 +23,6 @@ namespace SigScanner
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            //
-
             ModuleNameTextBox.Text = "Scan all";
             ModuleNameTextBox.ForeColor = SystemColors.GrayText;
 
@@ -60,7 +58,7 @@ namespace SigScanner
             // TODO:
         }
 
-        private void SigsTreeView_DoubleClick(object sender, EventArgs e)
+        private void SigsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             var treeView = sender as TreeView;
 
@@ -96,8 +94,7 @@ namespace SigScanner
 
             // TODO: reset module?
 
-            // add sig to list
-            //sigs.Add(sig);
+            //_sigs.Add(sig);
 
             if (imSearchCheckbox.Checked)
             {
@@ -186,11 +183,30 @@ namespace SigScanner
 
         private void RemoveButton_Click(object sender, EventArgs e)
         {
+            if (SigsTreeView.SelectedNode == null)
+            {
+                MessageBox.Show("You need to select something first", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // there SHOULD only be one sig with the same pattern in the list but just in case
+            //var sigs = _sigs.Where(x => x.Pattern == SigsTreeView.SelectedNode.Text).ToList();
+            //if (sigs.Any())
+            //{
+            //    foreach (var sig in sigs)
+            //        _sigs.Remove(sig);
+            //}
+
             SigsTreeView.SelectedNode.Remove();
         }
 
         private void ClearAllButton_Click(object sender, EventArgs e)
         {
+            if (SigsTreeView.Nodes.Count < 1)
+                return;
+
+            //_sigs.Clear();
+
             SigsTreeView.Nodes.Clear();
         }
     }

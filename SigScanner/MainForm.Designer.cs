@@ -195,7 +195,7 @@
             this.SigsTreeView.Name = "SigsTreeView";
             this.SigsTreeView.Size = new System.Drawing.Size(371, 127);
             this.SigsTreeView.TabIndex = 17;
-            this.SigsTreeView.DoubleClick += new System.EventHandler(this.SigsTreeView_DoubleClick);
+            this.SigsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.SigsTreeView_NodeMouseDoubleClick);
             // 
             // MainForm
             // 

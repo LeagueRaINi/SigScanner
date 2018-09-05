@@ -141,16 +141,15 @@ namespace SigScanner.Helpers
 
         public IntPtr GetSignatureAddress(Signature sig)
         {
-            byte[] mem = this.DumpModule(sig.ModuleName);
-
-            return SignatureScanner.FindPattern(mem, sig);
+            var buf = this.DumpModule(sig.ModuleName);
+            return SignatureScanner.FindPattern(buf, sig);
         }
 
         private byte[] DumpModule(string moduleName = "")
         {
-            byte[] bytes = new byte[]{};
+            var bytes = new byte[]{};
 
-            if (String.IsNullOrWhiteSpace(moduleName))
+            if (string.IsNullOrWhiteSpace(moduleName))
             {
                 IEnumerable<byte> modDump = new List<byte>();
 
