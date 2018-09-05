@@ -12,11 +12,6 @@ namespace SigScanner.Helpers
         public string ProcessName { get; private set; }
         public IntPtr ProcessHandle { get; private set; }
 
-        public ProcessMemory()
-        {
-            //
-        }
-
         public ProcessMemory(string processName, Natives.Enums.ProcessAccessFlags handleAccess)
         {
             this.ProcessName = processName;
@@ -139,35 +134,23 @@ namespace SigScanner.Helpers
             return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
         }
 
-        public IntPtr GetSignatureAddress(Signature sig)
+        public byte[] DumpModules(List<string> moduleNames = null)
         {
-            var buf = this.DumpModule(sig.ModuleName);
-            return SignatureScanner.FindPattern(buf, sig);
-        }
+            IEnumerable<byte> buf = new List<byte>();
 
-        private byte[] DumpModule(string moduleName = "")
-        {
-            var bytes = new byte[]{};
-
-            if (string.IsNullOrWhiteSpace(moduleName))
+            foreach (ProcessModule module in Process.Modules)
             {
-                IEnumerable<byte> modDump = new List<byte>();
+                if (moduleNames != null && !moduleNames.Contains("Scan All"))
+                    if (!moduleNames.Contains(module.ModuleName))
+                        continue;
 
-                foreach (ProcessModule mod in Process.Modules)
-                {
-                    ReadMemory(mod.BaseAddress, mod.ModuleMemorySize, out bytes);
-                    modDump = modDump.Concat(bytes);
-                }
+                if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out var bytes))
+                    continue;
 
-                bytes = modDump.ToArray();
-            }
-            else
-            {
-                var module = GetModule(moduleName);
-                ReadMemory(module.BaseAddress, module.ModuleMemorySize, out bytes);
+                buf = buf.Concat(bytes);
             }
 
-            return bytes;
+            return buf.ToArray();
         }
     }
 }

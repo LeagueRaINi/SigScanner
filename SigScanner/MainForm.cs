@@ -32,15 +32,15 @@ namespace SigScanner
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            if (!ProcNameTextBox.Text.Any())
+            if (!_moduleSignatures.Any())
             {
-                MessageBox.Show("Process Name cannot be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("There are no Signatures?", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (ProcNameTextBox.ForeColor != Color.Green)
+            if (!ProcNameTextBox.Text.Any())
             {
-                MessageBox.Show("Process doesnt exist!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Process Name cannot be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -53,7 +53,18 @@ namespace SigScanner
             if (!_lastProcess.IsAlive())
                 return;
 
+            var moduleBuffer = _lastProcess.DumpModules(new List<string>(_moduleSignatures.Keys));
+            if (moduleBuffer.Length == 0)
+            {
+                MessageBox.Show("Failed to dump Modules", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // TODO:
+
+            this.UpdateTreeView();
+
+            MessageBox.Show("Finished", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void SigsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -87,9 +98,8 @@ namespace SigScanner
 
             SigMaskTextBox.Clear();
             SigPatternTextBox.Clear();
-            //ModuleNameTextBox.Clear();
 
-            if (sigPattern.Length < 2 || (SigMaskTextBox.Enabled && sigMask.Length < 2))
+            if (sigPattern.Length < 5 || (SigMaskTextBox.Enabled && sigMask.Length < 5))
             {
                 MessageBox.Show("Sig Pattern or Mask is to small", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -119,16 +129,6 @@ namespace SigScanner
             {
                 // TODO:
             }
-        }
-
-        private void ProcNameTextBox_TextChanged(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (ProcessMemory.DoesProcessExist(textBox.Text, out var processList))
-                textBox.ForeColor = Color.Green;
-            else
-                textBox.ForeColor = Color.OrangeRed;
         }
 
         private void imSearchCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -250,12 +250,14 @@ namespace SigScanner
 
                     moduleNode.Nodes.Add(sigNode);
 
-                    if (sig.Offset != IntPtr.Zero)
-                        sigNode.Nodes.Add($"0x{sig.Offset.ToString("")}");
-
-                    sigNode.ForeColor = sig.Offset != IntPtr.Zero
-                        ? Color.Green
+                    sigNode.ForeColor = sig.Offsets.Any()
+                        ? sig.Offsets.Count > 1
+                            ? Color.Orange
+                            : Color.Green
                         : Color.Red;
+
+                    foreach (var offset in sig.Offsets)
+                        sigNode.Nodes.Add($"0x{offset.ToString("X")}");
                 }
 
                 SigsTreeView.Nodes.Add(moduleNode);

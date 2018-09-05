@@ -6,11 +6,13 @@ namespace SigScanner.Helpers
     public static class SignatureScanner
     {
 
-        public static IntPtr FindPattern(byte[] moduleBuffer, Signature sig)
+        public static List<IntPtr> FindPattern(byte[] moduleBuffer, Signature sig)
         {
+            List<IntPtr> addressList = new List<IntPtr>();
+
             // invalid signature
             if (sig.Type == Signature.SigType.UNKNOWN)
-                return IntPtr.Zero;
+                return addressList;
 
             // Loop the region and look for the pattern.
             for (int x = 0; x < moduleBuffer.Length; x++)
@@ -18,11 +20,11 @@ namespace SigScanner.Helpers
                 if (SequenceCheck(moduleBuffer, x, sig.Bytes, sig.Mask))
                 {
                     // The pattern was found, return it.
-                    return new IntPtr(x);
+                    addressList.Add(new IntPtr(x));
                 }
             }
 
-            return IntPtr.Zero;
+            return addressList;
         }
 
         private static bool SequenceCheck(byte[] buffer, int offset, List<byte> pattern, string mask)

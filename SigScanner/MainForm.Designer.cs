@@ -53,7 +53,6 @@
             this.ProcNameTextBox.Name = "ProcNameTextBox";
             this.ProcNameTextBox.Size = new System.Drawing.Size(183, 20);
             this.ProcNameTextBox.TabIndex = 0;
-            this.ProcNameTextBox.TextChanged += new System.EventHandler(this.ProcNameTextBox_TextChanged);
             // 
             // label1
             // 
@@ -68,7 +67,7 @@
             // 
             this.SigPatternTextBox.Location = new System.Drawing.Point(8, 21);
             this.SigPatternTextBox.Name = "SigPatternTextBox";
-            this.SigPatternTextBox.Size = new System.Drawing.Size(187, 20);
+            this.SigPatternTextBox.Size = new System.Drawing.Size(196, 20);
             this.SigPatternTextBox.TabIndex = 2;
             this.SigPatternTextBox.TextChanged += new System.EventHandler(this.SigTextBox_TextChanged);
             // 
@@ -94,15 +93,15 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(101, 43);
+            this.label3.Location = new System.Drawing.Point(111, 44);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(80, 13);
+            this.label3.Size = new System.Drawing.Size(81, 13);
             this.label3.TabIndex = 7;
-            this.label3.Text = "Limit to module:";
+            this.label3.Text = "Limit to Module:";
             // 
             // ModuleNameTextBox
             // 
-            this.ModuleNameTextBox.Location = new System.Drawing.Point(104, 59);
+            this.ModuleNameTextBox.Location = new System.Drawing.Point(113, 59);
             this.ModuleNameTextBox.Name = "ModuleNameTextBox";
             this.ModuleNameTextBox.Size = new System.Drawing.Size(91, 20);
             this.ModuleNameTextBox.TabIndex = 8;
@@ -135,7 +134,7 @@
             this.AddSigButton.Location = new System.Drawing.Point(209, 21);
             this.AddSigButton.Margin = new System.Windows.Forms.Padding(2);
             this.AddSigButton.Name = "AddSigButton";
-            this.AddSigButton.Size = new System.Drawing.Size(83, 55);
+            this.AddSigButton.Size = new System.Drawing.Size(83, 58);
             this.AddSigButton.TabIndex = 12;
             this.AddSigButton.Text = "Add";
             this.AddSigButton.UseVisualStyleBackColor = true;
@@ -147,7 +146,7 @@
             this.SigMaskTextBox.Location = new System.Drawing.Point(8, 59);
             this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.SigMaskTextBox.Name = "SigMaskTextBox";
-            this.SigMaskTextBox.Size = new System.Drawing.Size(94, 20);
+            this.SigMaskTextBox.Size = new System.Drawing.Size(100, 20);
             this.SigMaskTextBox.TabIndex = 13;
             this.SigMaskTextBox.TextChanged += new System.EventHandler(this.SigMaskTextBox_TextChanged);
             this.SigMaskTextBox.Enter += new System.EventHandler(this.SigMaskTextBox_Enter);
@@ -157,7 +156,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 44);
+            this.label4.Location = new System.Drawing.Point(5, 44);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(36, 13);
             this.label4.TabIndex = 14;
@@ -176,7 +175,7 @@
             // 
             // ClearAllButton
             // 
-            this.ClearAllButton.Location = new System.Drawing.Point(296, 49);
+            this.ClearAllButton.Location = new System.Drawing.Point(296, 53);
             this.ClearAllButton.Margin = new System.Windows.Forms.Padding(2);
             this.ClearAllButton.Name = "ClearAllButton";
             this.ClearAllButton.Size = new System.Drawing.Size(83, 26);
