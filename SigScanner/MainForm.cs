@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SigScanner.Helpers;
 
@@ -16,6 +10,9 @@ namespace SigScanner
 {
     public partial class MainForm : Form
     {
+        private ProcessMemory _lastProcess;
+        private Dictionary<string, List<Signature>> _moduleSignatures;
+
         public MainForm()
         {
             InitializeComponent();
@@ -23,38 +20,39 @@ namespace SigScanner
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            _lastProcess = null;
+            _moduleSignatures = new Dictionary<string, List<Signature>>();
+
             ModuleNameTextBox.Text = "Scan all";
             ModuleNameTextBox.ForeColor = SystemColors.GrayText;
 
             SigMaskTextBox.Text = "xx????xxxx";
             SigMaskTextBox.ForeColor = SystemColors.GrayText;
-
-            //DEBUG
-
-            var sigNode = new TreeNode("75 0C 33 D2 89 57 14 BA ? ? ? ? FF E2");
-
-            sigNode.ForeColor = Color.Green;
-
-            SigsTreeView.Nodes.Add(sigNode);
-
-            sigNode.Nodes.Add("0x836342");
-
-            var sigNode2 = new TreeNode("89 0C 33 57 14 BA ? ? ? ? FF");
-
-            sigNode2.ForeColor = Color.Orange;
-
-            SigsTreeView.Nodes.Add(sigNode2);
-
-            sigNode2.Nodes.Add("0x926342");
-            sigNode2.Nodes.Add("0x126343");
-
-            var sigNode3 = new TreeNode("BA 33 57 14 BA ? ? ? ? FF");
-
-            SigsTreeView.Nodes.Add(sigNode3);
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
+            if (!ProcNameTextBox.Text.Any())
+            {
+                MessageBox.Show("Process Name cannot be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (ProcNameTextBox.ForeColor != Color.Green)
+            {
+                MessageBox.Show("Process doesnt exist!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (_lastProcess == null || _lastProcess.ProcessName != ProcNameTextBox.Text)
+                _lastProcess = new ProcessMemory(ProcNameTextBox.Text, Helpers.Natives.Enums.ProcessAccessFlags.VirtualMemoryRead);
+            else
+                if (!_lastProcess.IsAlive() || !_lastProcess.HasHandle())
+                    _lastProcess.GetProcess(Helpers.Natives.Enums.ProcessAccessFlags.VirtualMemoryRead);
+
+            if (!_lastProcess.IsAlive())
+                return;
+
             // TODO:
         }
 
@@ -63,7 +61,8 @@ namespace SigScanner
             var treeView = sender as TreeView;
 
             Clipboard.SetText(treeView.SelectedNode.Text);
-            modulesToolTip.Show("Copied to clipboard!", ActiveForm, PointToClient(MousePosition), 500);
+
+            ToolTip.Show("Copied to Clipboard!", ActiveForm, PointToClient(MousePosition), 500);
         }
 
         private void SigTextBox_TextChanged(object sender, EventArgs e)
@@ -82,22 +81,41 @@ namespace SigScanner
 
         private void AddSigButton_Click(object sender, EventArgs e)
         {
-            if (SigPatternTextBox.Text.Length < 2 || (SigMaskTextBox.Enabled && SigMaskTextBox.Text.Length < 2))
+            var sigMask = SigMaskTextBox.Text;
+            var sigPattern = SigPatternTextBox.Text;
+            var sigModuleName = ModuleNameTextBox.Text;
+
+            SigMaskTextBox.Clear();
+            SigPatternTextBox.Clear();
+            //ModuleNameTextBox.Clear();
+
+            if (sigPattern.Length < 2 || (SigMaskTextBox.Enabled && sigMask.Length < 2))
             {
                 MessageBox.Show("Sig Pattern or Mask is to small", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            var sig = new Signature(ModuleNameTextBox.Text, SigPatternTextBox.Text, SigMaskTextBox.Text);
+            if (_moduleSignatures.TryGetValue(sigModuleName, out var sigs))
+            {
+                foreach (var sig in sigs)
+                    if (string.Compare(sig.Pattern, sigPattern, true) == 0)
+                    {
+                        MessageBox.Show("Sig with this Pattern already exists in this Module", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+            }
+            else
+                _moduleSignatures.Add(sigModuleName, new List<Signature>());
 
-            SigPatternTextBox.Clear();
-            SigMaskTextBox.Clear();
+            var sigInfo = new Signature(sigModuleName, sigPattern, sigMask);
+            if (!sigInfo.IsValid())
+                return;
 
-            // TODO: reset module?
+            _moduleSignatures[sigModuleName].Add(sigInfo);
 
-            //_sigs.Add(sig);
+            this.UpdateTreeView();
 
-            if (imSearchCheckbox.Checked)
+            if (InstantSearchCheckBox.Checked)
             {
                 // TODO:
             }
@@ -107,7 +125,7 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            if (Helpers.ProcessMemory.DoesProcessExist(textBox.Text, out var processList))
+            if (ProcessMemory.DoesProcessExist(textBox.Text, out var processList))
                 textBox.ForeColor = Color.Green;
             else
                 textBox.ForeColor = Color.OrangeRed;
@@ -149,7 +167,7 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            if (textBox.Text != @"xx????xxxx")
+            if (!textBox.Text.Equals(@"xx????xxxx"))
                 return;
 
             textBox.Text = "";
@@ -160,7 +178,7 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            if (textBox.Text.Length != 0)
+            if (textBox.Text.Any())
                 return;
 
             textBox.Text = @"xx????xxxx";
@@ -190,25 +208,58 @@ namespace SigScanner
                 return;
             }
 
-            // there SHOULD only be one sig with the same pattern in the list but just in case
-            //var sigs = _sigs.Where(x => x.Pattern == SigsTreeView.SelectedNode.Text).ToList();
-            //if (sigs.Any())
+            // TODO:
+            // determine if the selected node is an address, pattern or module #regex?
+
+            //if (!_moduleSignatures.TryGetValue(moduleNode.Text, out var sigs))
+            //    return;
+
+            //foreach (var sig in sigs)
             //{
-            //    foreach (var sig in sigs)
-            //        _sigs.Remove(sig);
+            //    if (string.Compare(sig.Pattern, SigsTreeView.SelectedNode.Text) != 0)
+            //        continue;
+            //
+            //    sigs.Remove(sig);
+            //    break;
             //}
 
-            SigsTreeView.SelectedNode.Remove();
+            //this.UpdateTreeView();
         }
 
         private void ClearAllButton_Click(object sender, EventArgs e)
         {
-            if (SigsTreeView.Nodes.Count < 1)
+            if (!_moduleSignatures.Any())
                 return;
 
-            //_sigs.Clear();
+            _moduleSignatures.Clear();
 
+            this.UpdateTreeView();
+        }
+
+        private void UpdateTreeView()
+        {
             SigsTreeView.Nodes.Clear();
+
+            foreach (var module in _moduleSignatures)
+            {
+                var moduleNode = new TreeNode(module.Key);
+
+                foreach (var sig in module.Value)
+                {
+                    var sigNode = new TreeNode(sig.Pattern);
+
+                    moduleNode.Nodes.Add(sigNode);
+
+                    if (sig.Offset != IntPtr.Zero)
+                        sigNode.Nodes.Add($"0x{sig.Offset.ToString("")}");
+
+                    sigNode.ForeColor = sig.Offset != IntPtr.Zero
+                        ? Color.Green
+                        : Color.Red;
+                }
+
+                SigsTreeView.Nodes.Add(moduleNode);
+            }
         }
     }
 }

@@ -37,13 +37,13 @@
             this.label3 = new System.Windows.Forms.Label();
             this.ModuleNameTextBox = new System.Windows.Forms.TextBox();
             this.ProgressBar = new System.Windows.Forms.ProgressBar();
-            this.imSearchCheckbox = new System.Windows.Forms.CheckBox();
+            this.InstantSearchCheckBox = new System.Windows.Forms.CheckBox();
             this.AddSigButton = new System.Windows.Forms.Button();
             this.SigMaskTextBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.RemoveButton = new System.Windows.Forms.Button();
             this.ClearAllButton = new System.Windows.Forms.Button();
-            this.modulesToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SigsTreeView = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
@@ -106,7 +106,7 @@
             this.ModuleNameTextBox.Name = "ModuleNameTextBox";
             this.ModuleNameTextBox.Size = new System.Drawing.Size(91, 20);
             this.ModuleNameTextBox.TabIndex = 8;
-            this.modulesToolTip.SetToolTip(this.ModuleNameTextBox, "Leave blank to scan all");
+            this.ToolTip.SetToolTip(this.ModuleNameTextBox, "Leave blank to scan all");
             this.ModuleNameTextBox.Enter += new System.EventHandler(this.ModuleNameTextBox_Enter);
             this.ModuleNameTextBox.Leave += new System.EventHandler(this.ModuleNameTextBox_Leave);
             // 
@@ -118,17 +118,17 @@
             this.ProgressBar.Size = new System.Drawing.Size(372, 12);
             this.ProgressBar.TabIndex = 10;
             // 
-            // imSearchCheckbox
+            // InstantSearchCheckBox
             // 
-            this.imSearchCheckbox.AutoSize = true;
-            this.imSearchCheckbox.Location = new System.Drawing.Point(203, 236);
-            this.imSearchCheckbox.Margin = new System.Windows.Forms.Padding(2);
-            this.imSearchCheckbox.Name = "imSearchCheckbox";
-            this.imSearchCheckbox.Size = new System.Drawing.Size(85, 17);
-            this.imSearchCheckbox.TabIndex = 11;
-            this.imSearchCheckbox.Text = "Auto Search";
-            this.imSearchCheckbox.UseVisualStyleBackColor = true;
-            this.imSearchCheckbox.CheckedChanged += new System.EventHandler(this.imSearchCheckbox_CheckedChanged);
+            this.InstantSearchCheckBox.AutoSize = true;
+            this.InstantSearchCheckBox.Location = new System.Drawing.Point(203, 236);
+            this.InstantSearchCheckBox.Margin = new System.Windows.Forms.Padding(2);
+            this.InstantSearchCheckBox.Name = "InstantSearchCheckBox";
+            this.InstantSearchCheckBox.Size = new System.Drawing.Size(85, 17);
+            this.InstantSearchCheckBox.TabIndex = 11;
+            this.InstantSearchCheckBox.Text = "Auto Search";
+            this.InstantSearchCheckBox.UseVisualStyleBackColor = true;
+            this.InstantSearchCheckBox.CheckedChanged += new System.EventHandler(this.imSearchCheckbox_CheckedChanged);
             // 
             // AddSigButton
             // 
@@ -185,9 +185,9 @@
             this.ClearAllButton.UseVisualStyleBackColor = true;
             this.ClearAllButton.Click += new System.EventHandler(this.ClearAllButton_Click);
             // 
-            // modulesToolTip
+            // ToolTip
             // 
-            this.modulesToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.ToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             // 
             // SigsTreeView
             // 
@@ -208,7 +208,7 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.SigMaskTextBox);
             this.Controls.Add(this.AddSigButton);
-            this.Controls.Add(this.imSearchCheckbox);
+            this.Controls.Add(this.InstantSearchCheckBox);
             this.Controls.Add(this.ProgressBar);
             this.Controls.Add(this.ModuleNameTextBox);
             this.Controls.Add(this.label3);
@@ -236,13 +236,13 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox ModuleNameTextBox;
         private System.Windows.Forms.ProgressBar ProgressBar;
-        private System.Windows.Forms.CheckBox imSearchCheckbox;
+        private System.Windows.Forms.CheckBox InstantSearchCheckBox;
         private System.Windows.Forms.Button AddSigButton;
         private System.Windows.Forms.TextBox SigMaskTextBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button RemoveButton;
         private System.Windows.Forms.Button ClearAllButton;
-        private System.Windows.Forms.ToolTip modulesToolTip;
+        private System.Windows.Forms.ToolTip ToolTip;
         private System.Windows.Forms.TreeView SigsTreeView;
     }
 }
