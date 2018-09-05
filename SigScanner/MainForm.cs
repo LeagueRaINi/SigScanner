@@ -51,10 +51,13 @@ namespace SigScanner
                     _lastProcess.GetProcess(Helpers.Natives.Enums.ProcessAccessFlags.VirtualMemoryRead);
 
             if (!_lastProcess.IsAlive())
+            {
+                _lastProcess.Dispose();
                 return;
+            }
 
             var moduleBuffer = _lastProcess.DumpModules(new List<string>(_moduleSignatures.Keys));
-            if (moduleBuffer.Length == 0)
+            if (moduleBuffer.Count == 0)
             {
                 MessageBox.Show("Failed to dump Modules", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;

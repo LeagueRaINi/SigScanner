@@ -134,9 +134,9 @@ namespace SigScanner.Helpers
             return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
         }
 
-        public byte[] DumpModules(List<string> moduleNames = null)
+        public Dictionary<string, byte[]> DumpModules(List<string> moduleNames = null)
         {
-            IEnumerable<byte> buf = new List<byte>();
+            var bufferList = new Dictionary<string, byte[]>();
 
             foreach (ProcessModule module in Process.Modules)
             {
@@ -147,10 +147,10 @@ namespace SigScanner.Helpers
                 if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out var bytes))
                     continue;
 
-                buf = buf.Concat(bytes);
+                bufferList.Add(module.ModuleName, bytes);
             }
 
-            return buf.ToArray();
+            return bufferList;
         }
     }
 }
