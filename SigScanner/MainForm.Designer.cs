@@ -34,7 +34,6 @@
             this.SigPatternTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.SearchButton = new System.Windows.Forms.Button();
-            this.OffsetsListView = new System.Windows.Forms.ListView();
             this.label3 = new System.Windows.Forms.Label();
             this.ModuleNameTextBox = new System.Windows.Forms.TextBox();
             this.ProgressBar = new System.Windows.Forms.ProgressBar();
@@ -45,6 +44,7 @@
             this.RemoveButton = new System.Windows.Forms.Button();
             this.ClearAllButton = new System.Windows.Forms.Button();
             this.modulesToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.SigsTreeView = new System.Windows.Forms.TreeView();
             this.SuspendLayout();
             // 
             // ProcNameTextBox
@@ -91,15 +91,6 @@
             this.SearchButton.UseVisualStyleBackColor = true;
             this.SearchButton.Click += new System.EventHandler(this.SearchButton_Click);
             // 
-            // OffsetsListView
-            // 
-            this.OffsetsListView.Location = new System.Drawing.Point(8, 83);
-            this.OffsetsListView.Name = "OffsetsListView";
-            this.OffsetsListView.Size = new System.Drawing.Size(374, 127);
-            this.OffsetsListView.TabIndex = 6;
-            this.OffsetsListView.UseCompatibleStateImageBehavior = false;
-            this.OffsetsListView.DoubleClick += new System.EventHandler(this.OffsetsListView_DoubleClick);
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -122,7 +113,7 @@
             // ProgressBar
             // 
             this.ProgressBar.Location = new System.Drawing.Point(8, 264);
-            this.ProgressBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ProgressBar.Margin = new System.Windows.Forms.Padding(2);
             this.ProgressBar.Name = "ProgressBar";
             this.ProgressBar.Size = new System.Drawing.Size(372, 12);
             this.ProgressBar.TabIndex = 10;
@@ -131,7 +122,7 @@
             // 
             this.imSearchCheckbox.AutoSize = true;
             this.imSearchCheckbox.Location = new System.Drawing.Point(203, 236);
-            this.imSearchCheckbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.imSearchCheckbox.Margin = new System.Windows.Forms.Padding(2);
             this.imSearchCheckbox.Name = "imSearchCheckbox";
             this.imSearchCheckbox.Size = new System.Drawing.Size(85, 17);
             this.imSearchCheckbox.TabIndex = 11;
@@ -142,7 +133,7 @@
             // AddSigButton
             // 
             this.AddSigButton.Location = new System.Drawing.Point(209, 21);
-            this.AddSigButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.AddSigButton.Margin = new System.Windows.Forms.Padding(2);
             this.AddSigButton.Name = "AddSigButton";
             this.AddSigButton.Size = new System.Drawing.Size(83, 55);
             this.AddSigButton.TabIndex = 12;
@@ -154,7 +145,7 @@
             // 
             this.SigMaskTextBox.Enabled = false;
             this.SigMaskTextBox.Location = new System.Drawing.Point(8, 59);
-            this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.SigMaskTextBox.Name = "SigMaskTextBox";
             this.SigMaskTextBox.Size = new System.Drawing.Size(94, 20);
             this.SigMaskTextBox.TabIndex = 13;
@@ -175,7 +166,7 @@
             // RemoveButton
             // 
             this.RemoveButton.Location = new System.Drawing.Point(296, 21);
-            this.RemoveButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.RemoveButton.Margin = new System.Windows.Forms.Padding(2);
             this.RemoveButton.Name = "RemoveButton";
             this.RemoveButton.Size = new System.Drawing.Size(83, 26);
             this.RemoveButton.TabIndex = 15;
@@ -186,22 +177,32 @@
             // ClearAllButton
             // 
             this.ClearAllButton.Location = new System.Drawing.Point(296, 49);
-            this.ClearAllButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ClearAllButton.Margin = new System.Windows.Forms.Padding(2);
             this.ClearAllButton.Name = "ClearAllButton";
             this.ClearAllButton.Size = new System.Drawing.Size(83, 26);
             this.ClearAllButton.TabIndex = 16;
             this.ClearAllButton.Text = "Clear all";
             this.ClearAllButton.UseVisualStyleBackColor = true;
+            this.ClearAllButton.Click += new System.EventHandler(this.ClearAllButton_Click);
             // 
             // modulesToolTip
             // 
             this.modulesToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             // 
+            // SigsTreeView
+            // 
+            this.SigsTreeView.Location = new System.Drawing.Point(8, 85);
+            this.SigsTreeView.Name = "SigsTreeView";
+            this.SigsTreeView.Size = new System.Drawing.Size(371, 127);
+            this.SigsTreeView.TabIndex = 17;
+            this.SigsTreeView.DoubleClick += new System.EventHandler(this.SigsTreeView_DoubleClick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(388, 287);
+            this.ClientSize = new System.Drawing.Size(390, 287);
+            this.Controls.Add(this.SigsTreeView);
             this.Controls.Add(this.ClearAllButton);
             this.Controls.Add(this.RemoveButton);
             this.Controls.Add(this.label4);
@@ -211,7 +212,6 @@
             this.Controls.Add(this.ProgressBar);
             this.Controls.Add(this.ModuleNameTextBox);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.OffsetsListView);
             this.Controls.Add(this.SearchButton);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.SigPatternTextBox);
@@ -233,7 +233,6 @@
         private System.Windows.Forms.TextBox SigPatternTextBox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button SearchButton;
-        private System.Windows.Forms.ListView OffsetsListView;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox ModuleNameTextBox;
         private System.Windows.Forms.ProgressBar ProgressBar;
@@ -244,6 +243,7 @@
         private System.Windows.Forms.Button RemoveButton;
         private System.Windows.Forms.Button ClearAllButton;
         private System.Windows.Forms.ToolTip modulesToolTip;
+        private System.Windows.Forms.TreeView SigsTreeView;
     }
 }
 

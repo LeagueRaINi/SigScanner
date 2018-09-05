@@ -30,6 +30,29 @@ namespace SigScanner
 
             SigMaskTextBox.Text = "xx????xxxx";
             SigMaskTextBox.ForeColor = SystemColors.GrayText;
+
+            //DEBUG
+
+            var sigNode = new TreeNode("75 0C 33 D2 89 57 14 BA ? ? ? ? FF E2");
+
+            sigNode.ForeColor = Color.Green;
+
+            SigsTreeView.Nodes.Add(sigNode);
+
+            sigNode.Nodes.Add("0x836342");
+
+            var sigNode2 = new TreeNode("89 0C 33 57 14 BA ? ? ? ? FF");
+
+            sigNode2.ForeColor = Color.Orange;
+
+            SigsTreeView.Nodes.Add(sigNode2);
+
+            sigNode2.Nodes.Add("0x926342");
+            sigNode2.Nodes.Add("0x126343");
+
+            var sigNode3 = new TreeNode("BA 33 57 14 BA ? ? ? ? FF");
+
+            SigsTreeView.Nodes.Add(sigNode3);
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -37,17 +60,11 @@ namespace SigScanner
             // TODO:
         }
 
-        private void OffsetsListView_DoubleClick(object sender, EventArgs e)
+        private void SigsTreeView_DoubleClick(object sender, EventArgs e)
         {
-            var selectedItems = OffsetsListView.SelectedItems;
-            if (selectedItems.Count < 1)
-                return;
+            var treeView = sender as TreeView;
 
-            var selectedItemsSubItems = selectedItems[0].SubItems;
-            if (selectedItemsSubItems.Count < 1)
-                return;
-
-            Clipboard.SetText(selectedItemsSubItems[1].Text);
+            Clipboard.SetText(treeView.SelectedNode.Text);
         }
 
         private void SigTextBox_TextChanged(object sender, EventArgs e)
@@ -66,16 +83,17 @@ namespace SigScanner
 
         private void AddSigButton_Click(object sender, EventArgs e)
         {
-            if (SigPatternTextBox.Text.Length < 2 || (SigMaskTextBox.Enabled && SigMaskTextBox.Text.Length < 1))
+            if (SigPatternTextBox.Text.Length < 2 || (SigMaskTextBox.Enabled && SigMaskTextBox.Text.Length < 2))
             {
-                // TODO: msgbox?
+                MessageBox.Show("Sig Pattern or Mask is to small", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            Signature sig = new Signature(ModuleNameTextBox.Text, SigPatternTextBox.Text, SigMaskTextBox.Text);
+            var sig = new Signature(ModuleNameTextBox.Text, SigPatternTextBox.Text, SigMaskTextBox.Text);
 
-            SigPatternTextBox.Text = "";
-            SigMaskTextBox.Text = "";
+            SigPatternTextBox.Clear();
+            SigMaskTextBox.Clear();
+
             // TODO: reset module?
 
             // add sig to list
@@ -168,7 +186,12 @@ namespace SigScanner
 
         private void RemoveButton_Click(object sender, EventArgs e)
         {
-            //
+            SigsTreeView.SelectedNode.Remove();
+        }
+
+        private void ClearAllButton_Click(object sender, EventArgs e)
+        {
+            SigsTreeView.Nodes.Clear();
         }
     }
 }
