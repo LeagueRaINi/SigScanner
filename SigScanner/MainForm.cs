@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -22,6 +23,12 @@ namespace SigScanner
         private void MainForm_Load(object sender, EventArgs e)
         {
             //
+
+            ModuleNameTextBox.Text = "Scan all";
+            ModuleNameTextBox.ForeColor = SystemColors.GrayText;
+
+            SigMaskTextBox.Text = "xx????xxxx";
+            SigMaskTextBox.ForeColor = SystemColors.GrayText;
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -75,6 +82,74 @@ namespace SigScanner
         private void MainForm_MouseEnter(object sender, EventArgs e)
         {
             ProgressBar.Value = new Random().Next(0, 100);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void imSearchCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+
+            if (checkBox.Checked)
+                SearchButton.Text = "Refresh";
+            else
+                SearchButton.Text = "Search";
+        }
+
+        private void ModuleNameTextBox_Enter(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+
+            if (textBox.Text != "Scan all")
+                return;
+
+            textBox.Text = "";
+            textBox.ForeColor = SystemColors.WindowText;
+        }
+
+        private void ModuleNameTextBox_Leave(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+
+            if (textBox.Text.Length != 0)
+                return;
+
+            textBox.Text = "Scan all";
+            textBox.ForeColor = SystemColors.GrayText;
+        }
+
+        private void SigMaskTextBox_Enter(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+
+            if (textBox.Text != "xx????xxxx")
+                return;
+
+            textBox.Text = "";
+            textBox.ForeColor = SystemColors.WindowText;
+        }
+
+        private void SigMaskTextBox_Leave(object sender, EventArgs e)
+        {
+            var textBox = sender as TextBox;
+
+            if (textBox.Text.Length != 0)
+                return;
+
+            textBox.Text = "xx????xxxx";
+            textBox.ForeColor = SystemColors.GrayText;
+        }
+
+        private void SigMaskTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // disallow characters
+            if (!char.IsControl(e.KeyChar) /*&& e.KeyChar != (char)Keys.Back*/ && !Regex.IsMatch(e.KeyChar.ToString(), @"[x|?]"))
+            {
+                e.Handled = true;
+            }
         }
     }
 }
