@@ -8,32 +8,22 @@ namespace SigScanner.Helpers
     public class ProcessMemory
     {
         public Process Process { get; private set; }
+        public string ProcessName { get; private set; }
         public IntPtr ProcessHandle { get; private set; }
 
         public ProcessMemory(string processName, Natives.Enums.ProcessAccessFlags handleAccess)
         {
-            var processList = Process.GetProcessesByName(processName);
-            if (processList.Count() == 0)
-            {
-                MessageBox.Show($"Could not find Process: {processName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            this.Process = processList.FirstOrDefault();
-            this.ProcessHandle = Natives.Imports.OpenProcess(handleAccess, false, this.Process.Id);
-
-            if (this.ProcessHandle == IntPtr.Zero)
-                MessageBox.Show($"Could not Open Handle to Process: {processName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            this.ProcessName = processName;
+            this.GetProcess(handleAccess);
         }
 
         ~ProcessMemory()
         {
             this.CloseHandle();
-        }
 
-        public bool CanRPM()
-        {
-            return this.IsAlive() && this.HasHandle();
+            this.Process = null;
+            this.ProcessName = string.Empty;
+            this.ProcessHandle = IntPtr.Zero;
         }
 
         public bool IsAlive()
@@ -44,6 +34,28 @@ namespace SigScanner.Helpers
         public bool HasHandle()
         {
             return this.ProcessHandle != null && this.ProcessHandle != IntPtr.Zero;
+        }
+
+        public void GetProcess(Natives.Enums.ProcessAccessFlags handleAccess)
+        {
+            if (this.IsAlive() && this.HasHandle())
+                return;
+
+            this.Process = null;
+            this.ProcessHandle = IntPtr.Zero;
+
+            var processList = Process.GetProcessesByName(this.ProcessName);
+            if (processList.Count() == 0)
+            {
+                MessageBox.Show($"Could not find Process: {this.ProcessName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            this.Process = processList.FirstOrDefault();
+            this.ProcessHandle = Natives.Imports.OpenProcess(handleAccess, false, this.Process.Id);
+
+            if (this.ProcessHandle == IntPtr.Zero)
+                MessageBox.Show($"Could not Open Handle to Process: {this.ProcessName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public void CloseHandle()
