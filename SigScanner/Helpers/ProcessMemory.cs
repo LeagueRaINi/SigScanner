@@ -12,29 +12,31 @@ namespace SigScanner.Helpers
         public string ProcessName { get; private set; }
         public IntPtr ProcessHandle { get; private set; }
 
+        public ProcessMemory()
+        {
+            //
+        }
+
         public ProcessMemory(string processName, Natives.Enums.ProcessAccessFlags handleAccess)
         {
             this.ProcessName = processName;
             this.GetProcess(handleAccess);
         }
 
-        public ProcessMemory()
-        {
-
-        }
-
         ~ProcessMemory()
         {
             this.CloseHandle();
-
-            this.Process = null;
-            this.ProcessName = string.Empty;
-            this.ProcessHandle = IntPtr.Zero;
         }
 
         public void Dispose()
         {
             this.CloseHandle();
+        }
+
+        public static bool DoesProcessExist(string processName, out Process[] processList)
+        {
+            processList = Process.GetProcessesByName(processName);
+            return processList.Any();
         }
 
         public bool IsAlive()
@@ -55,14 +57,39 @@ namespace SigScanner.Helpers
             this.Process = null;
             this.ProcessHandle = IntPtr.Zero;
 
-            var processList = Process.GetProcessesByName(this.ProcessName);
-            if (processList.Count() == 0)
+            if (!DoesProcessExist(this.ProcessName, out var processList))
             {
                 MessageBox.Show($"Could not find Process: {this.ProcessName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            this.Process = processList.FirstOrDefault();
+            if (processList.Count() > 1 &&
+                MessageBox.Show(
+                    $"Found {processList.Count()} Processes with the Name {this.ProcessName}. Do you want to select one or let me pick a random one?",
+                    "Warning!",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
+                var processSelection = new ProcessSelectForm(processList);
+
+                processSelection.FormClosing += (sender, e) =>
+                {
+                    var form = sender as ProcessSelectForm;
+                    if (form.SelectedProcess != null)
+                        this.Process = form.SelectedProcess;
+                };
+
+                processSelection.ShowDialog();
+
+                if (!this.IsAlive())
+                {
+                    MessageBox.Show("Selected Process is invalid or has exited", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            else
+                this.Process = processList.FirstOrDefault();
+
             this.ProcessHandle = Natives.Imports.OpenProcess(handleAccess, false, this.Process.Id);
 
             if (this.ProcessHandle == IntPtr.Zero)
@@ -71,7 +98,7 @@ namespace SigScanner.Helpers
 
         public void CloseHandle()
         {
-            if (!this.IsAlive() && !this.HasHandle())
+            if (!this.IsAlive() || !this.HasHandle())
                 return;
 
             Natives.Imports.CloseHandle(this.ProcessHandle);
