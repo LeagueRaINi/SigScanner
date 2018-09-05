@@ -8,7 +8,8 @@ namespace SigScanner.Helpers
 
         public static IntPtr FindPattern(byte[] moduleBuffer, Signature sig)
         {
-            if (sig.Type == Signature.SigType.UNKNOWN) // invalid signature
+            // invalid signature
+            if (sig.Type == Signature.SigType.UNKNOWN)
                 return IntPtr.Zero;
 
             // Loop the region and look for the pattern.
@@ -16,9 +17,8 @@ namespace SigScanner.Helpers
             {
                 if (SequenceCheck(moduleBuffer, x, sig.Bytes, sig.Mask))
                 {
-                    // The pattern was found, return it's address.
-                    // TODO: add base address
-                    return new IntPtr(x /*+ sig.Offset*/);
+                    // The pattern was found, return it.
+                    return new IntPtr(x);
                 }
             }
 
@@ -36,6 +36,7 @@ namespace SigScanner.Helpers
                 if (mask[x] == 'x' && pattern[x] != buffer[offset + x])
                     return false;
             }
+
             // loop succeeded, pattern found
             return true;
         }

@@ -33,7 +33,7 @@ namespace SigScanner
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            //
+            // TODO:
         }
 
         private void OffsetsListView_DoubleClick(object sender, EventArgs e)
@@ -75,18 +75,10 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            // TODO: check for process' existence
-        }
-
-        // meme
-        private void MainForm_MouseEnter(object sender, EventArgs e)
-        {
-            ProgressBar.Value = new Random().Next(0, 100);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
+            if (Helpers.ProcessMemory.DoesProcessExist(textBox.Text, out var processList))
+                textBox.ForeColor = Color.Green;
+            else
+                textBox.ForeColor = Color.OrangeRed;
         }
 
         private void imSearchCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -150,6 +142,11 @@ namespace SigScanner
             {
                 e.Handled = true;
             }
+        }
+
+        private void RemoveButton_Click(object sender, EventArgs e)
+        {
+            //
         }
     }
 }
