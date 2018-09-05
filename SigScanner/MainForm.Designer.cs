@@ -166,6 +166,7 @@
             this.SigMaskTextBox.Name = "SigMaskTextBox";
             this.SigMaskTextBox.Size = new System.Drawing.Size(184, 31);
             this.SigMaskTextBox.TabIndex = 13;
+            this.SigMaskTextBox.TextChanged += new System.EventHandler(this.SigMaskTextBox_TextChanged);
             this.SigMaskTextBox.Enter += new System.EventHandler(this.SigMaskTextBox_Enter);
             this.SigMaskTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SigMaskTextBox_KeyPress);
             this.SigMaskTextBox.Leave += new System.EventHandler(this.SigMaskTextBox_Leave);

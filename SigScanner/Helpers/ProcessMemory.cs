@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
@@ -109,6 +110,38 @@ namespace SigScanner.Helpers
             }
 
             return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
+        }
+
+        public IntPtr GetSignatureAddress(Signature sig)
+        {
+            byte[] mem = this.DumpModule(sig.ModuleName);
+
+            return SignatureScanner.FindPattern(mem, sig);
+        }
+
+        private byte[] DumpModule(string moduleName = "")
+        {
+            byte[] bytes = new byte[]{};
+
+            if (String.IsNullOrWhiteSpace(moduleName))
+            {
+                IEnumerable<byte> modDump = new List<byte>();
+
+                foreach (ProcessModule mod in Process.Modules)
+                {
+                    ReadMemory(mod.BaseAddress, mod.ModuleMemorySize, out bytes);
+                    modDump = modDump.Concat(bytes);
+                }
+
+                bytes = modDump.ToArray();
+            }
+            else
+            {
+                var module = GetModule(moduleName);
+                ReadMemory(module.BaseAddress, module.ModuleMemorySize, out bytes);
+            }
+
+            return bytes;
         }
     }
 }

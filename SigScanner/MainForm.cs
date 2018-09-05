@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SigScanner.Helpers;
 
 namespace SigScanner
 {
@@ -65,9 +66,24 @@ namespace SigScanner
 
         private void AddSigButton_Click(object sender, EventArgs e)
         {
+            if (SigPatternTextBox.Text.Length < 2 || (SigMaskTextBox.Enabled && SigMaskTextBox.Text.Length < 1))
+            {
+                // TODO: msgbox?
+                return;
+            }
+
+            Signature sig = new Signature(ModuleNameTextBox.Text, SigPatternTextBox.Text, SigMaskTextBox.Text);
+
+            SigPatternTextBox.Text = "";
+            SigMaskTextBox.Text = "";
+            // TODO: reset module?
+
+            // add sig to list
+            sigs.Add(sig);
+
             if (imSearchCheckbox.Checked)
             {
-                // TODO
+                // TODO:
             }
         }
 
@@ -125,7 +141,7 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            if (textBox.Text != "xx????xxxx")
+            if (textBox.Text != @"xx????xxxx")
                 return;
 
             textBox.Text = "";
@@ -139,7 +155,7 @@ namespace SigScanner
             if (textBox.Text.Length != 0)
                 return;
 
-            textBox.Text = "xx????xxxx";
+            textBox.Text = @"xx????xxxx";
             textBox.ForeColor = SystemColors.GrayText;
         }
 
@@ -148,8 +164,14 @@ namespace SigScanner
             // disallow characters
             if (!char.IsControl(e.KeyChar) /*&& e.KeyChar != (char)Keys.Back*/ && !Regex.IsMatch(e.KeyChar.ToString(), @"[x|?]"))
             {
+                // TODO: show tooltip to notify usage of disallowed character?
                 e.Handled = true;
             }
+        }
+
+        private void SigMaskTextBox_TextChanged(object sender, EventArgs e)
+        {
+            // TODO: prevent pasting of disallowed characters
         }
     }
 }
