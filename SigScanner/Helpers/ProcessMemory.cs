@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace SigScanner.Helpers
 {
-    public class ProcessMemory
+    public class ProcessMemory : IDisposable
     {
         public Process Process { get; private set; }
         public string ProcessName { get; private set; }
@@ -17,6 +17,11 @@ namespace SigScanner.Helpers
             this.GetProcess(handleAccess);
         }
 
+        public ProcessMemory()
+        {
+
+        }
+
         ~ProcessMemory()
         {
             this.CloseHandle();
@@ -24,6 +29,11 @@ namespace SigScanner.Helpers
             this.Process = null;
             this.ProcessName = string.Empty;
             this.ProcessHandle = IntPtr.Zero;
+        }
+
+        public void Dispose()
+        {
+            this.CloseHandle();
         }
 
         public bool IsAlive()
@@ -60,9 +70,7 @@ namespace SigScanner.Helpers
 
         public void CloseHandle()
         {
-            if (!this.IsAlive())
-                return;
-            if (!this.HasHandle())
+            if (!this.IsAlive() && !this.HasHandle())
                 return;
 
             Natives.Imports.CloseHandle(this.ProcessHandle);

@@ -16,7 +16,7 @@ namespace SigScanner.Helpers
             {
                 if (SequenceCheck(moduleBuffer, x, sig.Bytes, sig.Mask))
                 {
-                    // The pattern was found, return it.
+                    // The pattern was found, return it's address.
                     // TODO: add base address
                     return new IntPtr(x /*+ sig.Offset*/);
                 }
