@@ -15,12 +15,12 @@ namespace SigScanner.Helpers
                 return addressList;
 
             // Loop the region and look for the pattern.
-            for (int x = 0; x < moduleBuffer.Length; x++)
+            for (int i = 0; i < moduleBuffer.Length - sig.Pattern.Length; i++)
             {
-                if (SequenceCheck(moduleBuffer, x, sig.Bytes, sig.Mask))
+                if (SequenceCheck(moduleBuffer, i, sig.Bytes, sig.Mask))
                 {
                     // The pattern was found, return it.
-                    addressList.Add(new IntPtr(x));
+                    addressList.Add(new IntPtr(i));
                 }
             }
 

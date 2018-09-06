@@ -87,6 +87,11 @@ namespace SigScanner.Helpers
             }
         }
 
+        public bool[] GetMaskBool()
+        {
+            return Mask.Select(x => x == 'x').ToArray();
+        }
+
         public static bool IsValidMask(string mask)
         {
             if (string.IsNullOrEmpty(mask))
