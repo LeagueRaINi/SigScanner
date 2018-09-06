@@ -20,7 +20,7 @@ namespace SigScanner.Helpers
         public SigType Type { get; private set; }
         public List<byte> Bytes { get; private set; }
         public string ModuleName { get; private set; }
-        public List<IntPtr> Offsets { get; set; }
+        public Dictionary<string, List<IntPtr>> Offsets { get; set; }
 
         private static Regex _idaRegex = new Regex(@"(\s?[a-fA-F0-9?]{1,2}\s?)");
         private static Regex _codeRegex = new Regex(@"(\\x)([a-fA-F0-9]{1,2})");
@@ -32,7 +32,7 @@ namespace SigScanner.Helpers
             this.ModuleName = moduleName;
             this.Type = GetSigType(pattern, mask, true);
             this.Bytes = GetSigBytes(this.Type, pattern, mask);
-            this.Offsets = new List<IntPtr>();
+            this.Offsets = new Dictionary<string, List<IntPtr>>();
         }
 
         public bool IsValid()

@@ -28,6 +28,9 @@ namespace SigScanner
 
             SigMaskTextBox.Text = "xx????xxxx";
             SigMaskTextBox.ForeColor = SystemColors.GrayText;
+
+            var x = new Signature("test", @"\x55\x22\x33", "x?x");
+            var y = x.GetMaskBool();
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -55,17 +58,17 @@ namespace SigScanner
                 _lastProcess.Dispose();
                 return;
             }
-
+            /*
             var moduleBuffer = _lastProcess.DumpModules(new List<string>(_moduleSignatures.Keys));
             if (moduleBuffer.Count == 0)
             {
                 MessageBox.Show("Failed to dump Modules", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
+            */
             // TODO:
 
-            this.UpdateTreeView();
+            //this.UpdateTreeView();
 
             MessageBox.Show("Finished", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -126,7 +129,7 @@ namespace SigScanner
 
             _moduleSignatures[sigModuleName].Add(sigInfo);
 
-            this.UpdateTreeView();
+            //this.UpdateTreeView();
 
             if (InstantSearchCheckBox.Checked)
             {
@@ -236,9 +239,9 @@ namespace SigScanner
 
             _moduleSignatures.Clear();
 
-            this.UpdateTreeView();
+            //this.UpdateTreeView();
         }
-
+/*
         private void UpdateTreeView()
         {
             SigsTreeView.Nodes.Clear();
@@ -259,12 +262,13 @@ namespace SigScanner
                             : Color.Green
                         : Color.Red;
 
-                    foreach (var offset in sig.Offsets)
+                    foreach (var offset in sig.Offsets.Values)
                         sigNode.Nodes.Add($"0x{offset.ToString("X")}");
                 }
 
                 SigsTreeView.Nodes.Add(moduleNode);
             }
         }
+*/
     }
 }

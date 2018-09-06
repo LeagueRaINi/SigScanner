@@ -134,13 +134,34 @@ namespace SigScanner.Helpers
             return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
         }
 
-        public Dictionary<string, byte[]> DumpModules(List<string> moduleNames = null)
+        public void GetSignatureAddresses(Signature sig)
+        {
+            Dictionary<string, byte[]> memList = new Dictionary<string, byte[]>();
+
+            memList = DumpModule(sig.ModuleName);
+
+            if (memList.Count == 0) // could not find module!
+            {
+                // TODO: msgbox
+                return;
+            }
+
+            foreach (var mem in memList)
+            {
+                var addresses = SignatureScanner.FindPattern(mem.Value, sig);
+
+                if (addresses.Count > 1)
+                    sig.Offsets.Add(mem.Key, addresses);
+            }
+        }
+
+        private Dictionary<string, byte[]> DumpModule(string moduleNames = null)
         {
             var bufferList = new Dictionary<string, byte[]>();
 
             foreach (ProcessModule module in Process.Modules)
             {
-                if (moduleNames != null && !moduleNames.Contains("Scan All"))
+                if (moduleNames != null && !moduleNames.Equals("Scan All"))
                     if (!moduleNames.Contains(module.ModuleName))
                         continue;
 

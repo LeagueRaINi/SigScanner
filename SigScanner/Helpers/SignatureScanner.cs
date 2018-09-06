@@ -42,5 +42,35 @@ namespace SigScanner.Helpers
             // loop succeeded, pattern found
             return true;
         }
+
+        private static IntPtr BoyerMoore(byte[] haystack, byte[] needle)
+        {
+            Int64 skip = 0;
+            Int64[] badCharacters = new Int64[256];
+            Int64 lastPatternByte = needle.Length - 1;
+
+            for (Int64 i = 0; i < 256; ++i)
+                badCharacters[i] = needle.Length;
+
+            for (Int64 i = 0; i < lastPatternByte; ++i)
+                badCharacters[needle[i]] = lastPatternByte - i;
+
+            while (haystack.Length - skip >= needle.Length)
+            {
+                int i = needle.Length - 1;
+
+                while (haystack[skip + i] == needle[i])
+                {
+                    if (i == 0)
+                        return new IntPtr(skip);
+
+                    i--;
+                }
+
+                skip = skip + badCharacters[haystack[(skip + lastPatternByte)]];
+            }
+
+            return IntPtr.Zero;
+        }
     }
 }
