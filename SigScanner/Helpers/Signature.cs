@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SigScanner.Helpers
@@ -33,6 +34,9 @@ namespace SigScanner.Helpers
             this.Type = GetSigType(pattern, mask, true);
             this.Bytes = GetSigBytes(this.Type, pattern, mask);
             this.Offsets = new Dictionary<string, List<IntPtr>>();
+
+            if (String.IsNullOrEmpty(Mask) && this.Type == SigType.IDA)
+                SetMaskFromIda();
         }
 
         public bool IsValid()
@@ -89,6 +93,9 @@ namespace SigScanner.Helpers
 
         public bool[] GetMaskBool()
         {
+            if (String.IsNullOrEmpty(Mask))
+                SetMaskFromIda();
+
             return Mask.Select(x => x == 'x').ToArray();
         }
 
@@ -102,6 +109,21 @@ namespace SigScanner.Helpers
                     return false;
 
             return true;
+        }
+
+        private void SetMaskFromIda()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var b in Bytes)
+            {
+                if (b == 0)
+                    sb.Append('?');
+                else
+                    sb.Append('x');
+            }
+
+            Mask = sb.ToString();
         }
     }
 }
