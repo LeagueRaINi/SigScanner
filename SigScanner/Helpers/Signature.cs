@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -17,10 +18,11 @@ namespace SigScanner.Helpers
 
         public string Pattern { get; private set; }
         public string Mask { get; private set; }
+        public bool[] MaskBool { get; private set; }
         public SigType Type { get; private set; }
         public List<byte> Bytes { get; private set; }
         public string ModuleName { get; private set; }
-        public List<IntPtr> Offsets { get; set; }
+        public Dictionary<string, List<IntPtr>> Offsets { get; set; }
 
         private static Regex _idaRegex = new Regex(@"(\s?[a-fA-F0-9?]{1,2}\s?)");
         private static Regex _codeRegex = new Regex(@"(\\x)([a-fA-F0-9]{1,2})");
@@ -28,16 +30,29 @@ namespace SigScanner.Helpers
         public Signature(string moduleName, string pattern, string mask = "")
         {
             this.Pattern = pattern;
-            this.Mask = mask.ToLower();
+            this.Mask = mask;
             this.ModuleName = moduleName;
             this.Type = GetSigType(pattern, mask, true);
             this.Bytes = GetSigBytes(this.Type, pattern, mask);
-            this.Offsets = new List<IntPtr>();
+            this.MaskBool = GetMaskBool(this.Type, mask, pattern);
+            this.Offsets = new Dictionary<string, List<IntPtr>>();
         }
 
         public bool IsValid()
         {
             return this.Type != SigType.UNKNOWN && this.Bytes.Any();
+        }
+
+        public static bool IsValidMaskFormat(string mask)
+        {
+            if (string.IsNullOrEmpty(mask))
+                return false;
+
+            foreach (char charr in mask)
+                if (!charr.Equals('x') && !charr.Equals('?'))
+                    return false;
+
+            return true;
         }
 
         public static SigType GetSigType(string pattern, string mask = "", bool showError = false)
@@ -53,12 +68,15 @@ namespace SigScanner.Helpers
             var codeMatches = _codeRegex.Matches(pattern);
             if (codeMatches.Count == (pattern.Length / 4))
             {
-                if (IsValidMask(mask))
+                if (IsValidMaskFormat(mask))
                     return SigType.CODE;
+
+                // TODO: logger?
                 if (showError)
                     MessageBox.Show("Invalid Mask", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+            // TODO: logger?
             if (showError)
                 MessageBox.Show("Unknown Pattern format", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
@@ -87,21 +105,18 @@ namespace SigScanner.Helpers
             }
         }
 
-        public bool[] GetMaskBool()
+        public static bool[] GetMaskBool(SigType type, string mask, string pattern = "")
         {
-            return Mask.Select(x => x == 'x').ToArray();
-        }
+            if (type == SigType.IDA && !string.IsNullOrEmpty(pattern))
+            {
+                var sb = new StringBuilder();
+                foreach (var hex in pattern.Split(' '))
+                    sb.Append(hex.Equals("?") || hex.Equals("??") ? '?' : 'x');
 
-        public static bool IsValidMask(string mask)
-        {
-            if (string.IsNullOrEmpty(mask))
-                return false;
+                mask = sb.ToString();
+            }
 
-            foreach (char charr in mask)
-                if (!charr.Equals('x') && !charr.Equals('?'))
-                    return false;
-
-            return true;
+            return mask.Select(x => x == 'x').ToArray();
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using SigScanner.Helpers;
 
@@ -11,7 +12,7 @@ namespace SigScanner
     public partial class MainForm : Form
     {
         private ProcessMemory _lastProcess;
-        private Dictionary<string, List<Signature>> _moduleSignatures;
+        private List<Signature> _sigList;
 
         public MainForm()
         {
@@ -21,7 +22,7 @@ namespace SigScanner
         private void MainForm_Load(object sender, EventArgs e)
         {
             _lastProcess = null;
-            _moduleSignatures = new Dictionary<string, List<Signature>>();
+            _sigList = new List<Signature>();
 
             ModuleNameTextBox.Text = "Scan all";
             ModuleNameTextBox.ForeColor = SystemColors.GrayText;
@@ -32,7 +33,7 @@ namespace SigScanner
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            if (!_moduleSignatures.Any())
+            if (!_sigList.Any())
             {
                 MessageBox.Show("There are no Signatures?", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -56,14 +57,9 @@ namespace SigScanner
                 return;
             }
 
-            var moduleBuffer = _lastProcess.DumpModules(new List<string>(_moduleSignatures.Keys));
-            if (moduleBuffer.Count == 0)
-            {
-                MessageBox.Show("Failed to dump Modules", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            // TODO:
+            Parallel.ForEach(_sigList, (sig) => {
+                _lastProcess.GetSignatureAddresses(sig);
+            });
 
             this.UpdateTreeView();
 
@@ -108,7 +104,7 @@ namespace SigScanner
                 return;
             }
 
-            if (_moduleSignatures.TryGetValue(sigModuleName, out var sigs))
+            /*if (_sigList.TryGetValue(sigModuleName, out var sigs))
             {
                 foreach (var sig in sigs)
                     if (string.Compare(sig.Pattern, sigPattern, true) == 0)
@@ -118,13 +114,13 @@ namespace SigScanner
                     }
             }
             else
-                _moduleSignatures.Add(sigModuleName, new List<Signature>());
+                _moduleSignatures.Add(sigModuleName, new List<Signature>());*/
 
             var sigInfo = new Signature(sigModuleName, sigPattern, sigMask);
             if (!sigInfo.IsValid())
                 return;
 
-            _moduleSignatures[sigModuleName].Add(sigInfo);
+            _sigList.Add(sigInfo);
 
             this.UpdateTreeView();
 
@@ -231,10 +227,10 @@ namespace SigScanner
 
         private void ClearAllButton_Click(object sender, EventArgs e)
         {
-            if (!_moduleSignatures.Any())
+            if (!_sigList.Any())
                 return;
 
-            _moduleSignatures.Clear();
+            _sigList.Clear();
 
             this.UpdateTreeView();
         }
@@ -243,27 +239,28 @@ namespace SigScanner
         {
             SigsTreeView.Nodes.Clear();
 
-            foreach (var module in _moduleSignatures)
+            foreach(var sig in _sigList)
             {
-                var moduleNode = new TreeNode(module.Key);
-
-                foreach (var sig in module.Value)
+                var sigNode = new TreeNode(sig.Pattern)
                 {
-                    var sigNode = new TreeNode(sig.Pattern);
-
-                    moduleNode.Nodes.Add(sigNode);
-
-                    sigNode.ForeColor = sig.Offsets.Any()
+                    ForeColor = sig.Offsets.Any()
                         ? sig.Offsets.Count > 1
                             ? Color.Orange
                             : Color.Green
-                        : Color.Red;
+                        : Color.Red
+                };
 
-                    foreach (var offset in sig.Offsets)
-                        sigNode.Nodes.Add($"0x{offset.ToString("X")}");
+                foreach (var module in sig.Offsets)
+                {
+                    var moduleNode = new TreeNode(module.Key);
+
+                    foreach(var offset in module.Value)
+                        moduleNode.Nodes.Add($"0x{offset.ToString("X")}");
+
+                    sigNode.Nodes.Add(moduleNode);
                 }
 
-                SigsTreeView.Nodes.Add(moduleNode);
+                SigsTreeView.Nodes.Add(sigNode);
             }
         }
     }

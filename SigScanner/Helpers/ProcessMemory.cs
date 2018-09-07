@@ -11,27 +11,48 @@ namespace SigScanner.Helpers
         public Process Process { get; private set; }
         public string ProcessName { get; private set; }
         public IntPtr ProcessHandle { get; private set; }
+        public bool Disposed { get; private set; }
+        public Dictionary<ProcessModule, byte[]> ModuleCache { get; private set; }
 
         public ProcessMemory(string processName, Natives.Enums.ProcessAccessFlags handleAccess)
         {
             this.ProcessName = processName;
+            this.ModuleCache = new Dictionary<ProcessModule, byte[]>();
+
             this.GetProcess(handleAccess);
         }
 
         ~ProcessMemory()
         {
-            this.CloseHandle();
+            this.Dispose();
         }
 
         public void Dispose()
         {
-            this.CloseHandle();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public static bool DoesProcessExist(string processName, out Process[] processList)
+        protected virtual void Dispose(bool disposing)
         {
-            processList = Process.GetProcessesByName(processName);
-            return processList.Any();
+            if (this.Disposed)
+                return;
+
+            if (disposing)
+            {
+                // Free any managed objects here.
+                //
+
+                this.CloseHandle();
+            }
+
+            // Free any unmanaged objects here.
+            //
+
+            if (this.ModuleCache != null)
+                this.ModuleCache.Clear();
+
+            this.Disposed = true;
         }
 
         public bool IsAlive()
@@ -51,6 +72,7 @@ namespace SigScanner.Helpers
 
             this.Process = null;
             this.ProcessHandle = IntPtr.Zero;
+            this.ModuleCache.Clear();
 
             if (!DoesProcessExist(this.ProcessName, out var processList))
             {
@@ -115,6 +137,45 @@ namespace SigScanner.Helpers
             return null;
         }
 
+        public void GetSignatureAddresses(Signature sig)
+        {
+            var moduleList = new List<ProcessModule>();
+
+            if (!this.IsAlive())
+            {
+                MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan All"))
+                moduleList.Add(GetModule(sig.ModuleName));
+            else
+                foreach (ProcessModule processModule in this.Process.Modules)
+                    moduleList.Add(processModule);
+
+            if (moduleList.Count == 0)
+            {
+                MessageBox.Show("Could not find any Module", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            foreach (var mod in moduleList)
+            {
+                var addresses = BoyerMooreHorspool.FindPattern(this.DumpModule(mod), sig, mod.BaseAddress);
+                if (addresses.Count > 0)
+                    sig.Offsets.Add(mod.ModuleName, addresses);
+            }
+        }
+
+        public byte[] DumpModule(ProcessModule module)
+        {
+            var buffer = new byte[module.ModuleMemorySize];
+            if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out buffer))
+                MessageBox.Show($"Failed to Dump Module: {module.ModuleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            return buffer;
+        }
+
         public bool ReadMemory(IntPtr address, int size, out byte[] bytes)
         {
             bytes = new byte[size];
@@ -134,23 +195,10 @@ namespace SigScanner.Helpers
             return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
         }
 
-        public Dictionary<string, byte[]> DumpModules(List<string> moduleNames = null)
+        public static bool DoesProcessExist(string processName, out Process[] processList)
         {
-            var bufferList = new Dictionary<string, byte[]>();
-
-            foreach (ProcessModule module in Process.Modules)
-            {
-                if (moduleNames != null && !moduleNames.Contains("Scan All"))
-                    if (!moduleNames.Contains(module.ModuleName))
-                        continue;
-
-                if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out var bytes))
-                    continue;
-
-                bufferList.Add(module.ModuleName, bytes);
-            }
-
-            return bufferList;
+            processList = Process.GetProcessesByName(processName);
+            return processList.Any();
         }
     }
 }
