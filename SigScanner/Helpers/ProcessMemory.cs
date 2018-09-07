@@ -169,10 +169,17 @@ namespace SigScanner.Helpers
 
         public byte[] DumpModule(ProcessModule module)
         {
-            var buffer = new byte[module.ModuleMemorySize];
-            if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out buffer))
-                MessageBox.Show($"Failed to Dump Module: {module.ModuleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (this.ModuleCache.TryGetValue(module, out var moduleBuffer) && moduleBuffer.Any())
+                return moduleBuffer;
 
+            var buffer = new byte[module.ModuleMemorySize];
+            if (ReadMemory(module.BaseAddress, module.ModuleMemorySize, out buffer))
+            {
+                this.ModuleCache[module] = buffer;
+                return buffer;
+            }
+
+            MessageBox.Show($"Failed to Dump Module: {module.ModuleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return buffer;
         }
 
