@@ -27,6 +27,28 @@ namespace SigScanner.Helpers
             return addressList;
         }
 
+        public static List<IntPtr> FindPatternHorspool(byte[] moduleBuffer, Signature sig, IntPtr baseAddress)
+        {
+            List<IntPtr> addressList = new List<IntPtr>();
+            int addr = -1;
+
+            // invalid signature
+            if (sig.Type == Signature.SigType.UNKNOWN)
+                return addressList;
+
+            // TODO: move accumulation of multiple occurences to HorspoolSearch (avoids reinit of same pattern)
+            do
+            {
+                addr = HorspoolSearch(moduleBuffer, sig.Bytes.ToArray(), sig.GetMaskBool(), addr + sig.Bytes.Count);
+                if (addr < 0)   // no more occurences found
+                    break;
+
+                addressList.Add(IntPtr.Add(baseAddress, addr));
+            } while (true);
+
+            return addressList;
+        }
+
         private static bool SequenceCheck(byte[] buffer, int offset, List<byte> pattern, string mask)
         {
             for (int x = 0; x < pattern.Count; x++)
@@ -73,12 +95,12 @@ namespace SigScanner.Helpers
             return IntPtr.Zero;
         }
 
-        public static IntPtr HorspoolSearch(byte[] haystack, byte[] needle, bool[] mask, int startOffset = 0)
+        private static int HorspoolSearch(byte[] haystack, byte[] needle, bool[] mask, int startOffset = 0)
         {
             int i = startOffset;
             int j;
-            int m = needle.Length;
-            int n = haystack.Length;
+            int needleLength = needle.Length;
+            int haystackLength = haystack.Length;
             int[] occ = new int[256];
 
             void OccInit()
@@ -88,7 +110,7 @@ namespace SigScanner.Helpers
                 for (a = 0; a < 256; a++)
                     occ[a] = -1;
 
-                for (j = 0; j < m - 1; j++)
+                for (j = 0; j < needleLength - 1; j++)
                 {
                     a = needle[j];
                     occ[a] = j;
@@ -97,22 +119,21 @@ namespace SigScanner.Helpers
 
             OccInit();
 
-            while (i <= n - m)
+            while (i <= haystackLength - needleLength)
             {
-                j = m - 1;
+                j = needleLength - 1;
 
                 while (j >= 0 && (needle[j] == haystack[i + j] || !mask[j]))
                     j--;
 
-                // TODO: may currently return IntPtr.Zero although pattern was found
                 if (j < 0)
-                    return new IntPtr(i);
+                    return i;
 
-                i += m - 1;
+                i += needleLength - 1;
                 i -= occ[haystack[i]];
             }
 
-            return IntPtr.Zero;
+            return -1;
         }
     }
 }
