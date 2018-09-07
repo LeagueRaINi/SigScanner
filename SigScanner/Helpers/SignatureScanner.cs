@@ -39,7 +39,7 @@ namespace SigScanner.Helpers
             // TODO: move accumulation of multiple occurences to HorspoolSearch (avoids reinit of same pattern)
             do
             {
-                addr = HorspoolSearch(moduleBuffer, sig.Bytes.ToArray(), sig.GetMaskBool(), addr + sig.Bytes.Count);
+                addr = HorspoolSearch(moduleBuffer, sig.Bytes.ToArray(), sig.GetMaskBool(), addr < 0 ? 0 : addr + sig.Bytes.Count);
                 if (addr < 0)   // no more occurences found
                     break;
 
