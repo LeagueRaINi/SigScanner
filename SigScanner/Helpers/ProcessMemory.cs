@@ -99,7 +99,7 @@ namespace SigScanner.Helpers
             Natives.Imports.CloseHandle(this.ProcessHandle);
         }
 
-        public ProcessModule GetModule(string moduleName)
+        public ProcessModule FindModule(string moduleName)
         {
             if (!this.IsAlive())
             {
@@ -136,26 +136,45 @@ namespace SigScanner.Helpers
 
         public void GetSignatureAddresses(Signature sig)
         {
-            Dictionary<string, byte[]> memList = new Dictionary<string, byte[]>();
+            //Dictionary<string, byte[]> memList = new Dictionary<string, byte[]>();
+            List<ProcessModule> moduleList = new List<ProcessModule>();
 
-            memList = DumpModule(sig.ModuleName);
+            //memList = DumpModule(sig.ModuleName);
 
-            if (memList.Count == 0) // could not find module!
+            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan All"))
+            {
+                moduleList.Add(FindModule(sig.ModuleName));
+            }
+            else
+            {
+                foreach (ProcessModule processModule in Process.Modules)
+                    moduleList.Add(processModule);
+            }
+
+            if (moduleList.Count == 0) // could not find module!
             {
                 // TODO: msgbox
                 return;
             }
 
-            foreach (var mem in memList)
+            foreach (var mod in moduleList)
             {
-                var addresses = SignatureScanner.FindPattern(mem.Value, sig);
+                var addresses = SignatureScanner.FindPatternHorspool(DumpModule(mod), sig, mod.BaseAddress);
 
-                if (addresses.Count > 1)
-                    sig.Offsets.Add(mem.Key, addresses);
+                if (addresses.Count > 0)
+                    sig.Offsets.Add(mod.ModuleName, addresses);
             }
         }
 
-        private Dictionary<string, byte[]> DumpModule(string moduleNames = null)
+        private byte[] DumpModule(ProcessModule module)
+        {
+            if (!ReadMemory(module.BaseAddress, module.ModuleMemorySize, out var bytes))
+                throw new Exception("Could not read process memory");
+
+            return bytes;
+        }
+
+        private Dictionary<string, byte[]> DumpModules(string moduleNames = null)
         {
             var bufferList = new Dictionary<string, byte[]>();
 
