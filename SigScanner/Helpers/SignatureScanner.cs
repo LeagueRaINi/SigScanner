@@ -73,9 +73,10 @@ namespace SigScanner.Helpers
             return IntPtr.Zero;
         }
 
-        public static IntPtr HorspoolSearch(byte[] haystack, byte[] needle)
+        public static IntPtr HorspoolSearch(byte[] haystack, byte[] needle, bool[] mask, int startOffset = 0)
         {
-            int i = 0, j;
+            int i = startOffset;
+            int j;
             int m = needle.Length;
             int n = haystack.Length;
             int[] occ = new int[256];
@@ -100,7 +101,7 @@ namespace SigScanner.Helpers
             {
                 j = m - 1;
 
-                while (j >= 0 && needle[j] == haystack[i + j])
+                while (j >= 0 && (needle[j] == haystack[i + j] || !mask[j]))
                     j--;
 
                 // TODO: may currently return IntPtr.Zero although pattern was found
