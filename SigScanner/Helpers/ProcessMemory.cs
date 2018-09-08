@@ -163,7 +163,15 @@ namespace SigScanner.Helpers
             {
                 var addresses = BoyerMooreHorspool.FindPattern(this.DumpModule(mod), sig, mod.BaseAddress);
                 if (addresses.Count > 0)
-                    sig.Offsets.Add(mod.ModuleName, addresses);
+                    if (sig.Offsets.TryGetValue(mod.ModuleName, out var offsets))
+                    {
+                        offsets.Clear();
+
+                        foreach (var address in addresses)
+                            offsets.Add(address);
+                    }
+                    else
+                        sig.Offsets.Add(mod.ModuleName, addresses);
             }
         }
 

@@ -104,30 +104,32 @@ namespace SigScanner
                 return;
             }
 
-            /*if (_sigList.TryGetValue(sigModuleName, out var sigs))
+            var sigListObj = _sigList.Where(x => string.Compare(x.Pattern, sigPattern, true) == 0).FirstOrDefault();
+            if (sigListObj != null)
             {
-                foreach (var sig in sigs)
-                    if (string.Compare(sig.Pattern, sigPattern, true) == 0)
-                    {
-                        MessageBox.Show("Sig with this Pattern already exists in this Module", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                if (sigListObj.Offsets.Keys.Contains(sigModuleName))
+                {
+                    MessageBox.Show("Sig with this Pattern already exists for this Module", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                else
+                    sigListObj.Offsets.Add(sigModuleName, new List<IntPtr>());
             }
             else
-                _moduleSignatures.Add(sigModuleName, new List<Signature>());*/
+            {
+                var sigInfo = new Signature(sigModuleName, sigPattern, sigMask);
+                if (!sigInfo.IsValid())
+                    return;
 
-            var sigInfo = new Signature(sigModuleName, sigPattern, sigMask);
-            if (!sigInfo.IsValid())
-                return;
+                sigInfo.Offsets.Add(sigModuleName, new List<IntPtr>());
 
-            _sigList.Add(sigInfo);
+                _sigList.Add(sigInfo);
+            }
 
             this.UpdateTreeView();
 
             if (InstantSearchCheckBox.Checked)
-            {
-                // TODO:
-            }
+                SearchButton.PerformClick();
         }
 
         private void imSearchCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -207,22 +209,32 @@ namespace SigScanner
                 return;
             }
 
-            // TODO:
-            // determine if the selected node is an address, pattern or module #regex?
+            var selectedNodeText = SigsTreeView.SelectedNode.Text;
+            var parentNode = SigsTreeView.SelectedNode.Parent;
 
-            //if (!_moduleSignatures.TryGetValue(moduleNode.Text, out var sigs))
-            //    return;
+            if (parentNode == null)
+            {
+                var sigObj = _sigList.Where(x => x.Pattern.Equals(selectedNodeText)).FirstOrDefault();
+                if (sigObj != null)
+                    _sigList.Remove(sigObj);
+            }
+            else if (selectedNodeText.StartsWith("0x"))
+            {
+                var sigObj = _sigList.Where(x => x.Pattern.Equals(parentNode.Parent.Text)).FirstOrDefault();
+                if (sigObj != null)
+                    if (sigObj.Offsets.TryGetValue(parentNode.Text, out var offsets))
+                        offsets.Remove((IntPtr)Convert.ToInt32(selectedNodeText, 16));
+            }
+            else
+            {
+                var sigObj = _sigList.Where(x => x.Pattern.Equals(parentNode.Text)).FirstOrDefault();
+                if (sigObj != null)
+                    if (sigObj.Offsets.ContainsKey(selectedNodeText))
+                        sigObj.Offsets.Remove(selectedNodeText);
 
-            //foreach (var sig in sigs)
-            //{
-            //    if (string.Compare(sig.Pattern, SigsTreeView.SelectedNode.Text) != 0)
-            //        continue;
-            //
-            //    sigs.Remove(sig);
-            //    break;
-            //}
+            }
 
-            //this.UpdateTreeView();
+            this.UpdateTreeView();
         }
 
         private void ClearAllButton_Click(object sender, EventArgs e)
@@ -239,26 +251,47 @@ namespace SigScanner
         {
             SigsTreeView.Nodes.Clear();
 
-            foreach(var sig in _sigList)
+            var sigNodeColor = Color.Black;
+            var moduleNodeColor = Color.Black;
+
+            foreach (var sig in _sigList)
             {
-                var sigNode = new TreeNode(sig.Pattern)
-                {
-                    ForeColor = sig.Offsets.Any()
-                        ? sig.Offsets.Count > 1
-                            ? Color.Orange
-                            : Color.Green
-                        : Color.Red
-                };
+                var sigNode = new TreeNode(sig.Pattern);
 
                 foreach (var module in sig.Offsets)
                 {
-                    var moduleNode = new TreeNode(module.Key);
+                    var moduleNode = new TreeNode(module.Key)
+                    {
+                        ForeColor = module.Value.Count == 0
+                            ? Color.Red
+                            : module.Value.Count > 1
+                                ? Color.Orange
+                                : Color.Green
+                    };
 
-                    foreach(var offset in module.Value)
+                    foreach (var offset in module.Value)
                         moduleNode.Nodes.Add($"0x{offset.ToString("X")}");
 
                     sigNode.Nodes.Add(moduleNode);
                 }
+
+                var emptyNodes = 0;
+                var multiplyAddressesNodes = 0;
+                foreach (TreeNode node in sigNode.Nodes)
+                {
+                    if (node.ForeColor.Equals(Color.Red))
+                        emptyNodes++;
+                    if (node.ForeColor.Equals(Color.Orange))
+                        multiplyAddressesNodes++;
+                }
+
+                var sigNodesCount = sigNode.GetNodeCount(false);
+                if (sigNodesCount != 0)
+                    sigNode.ForeColor = multiplyAddressesNodes != 0
+                        ? Color.Orange
+                        : sigNodesCount == emptyNodes
+                            ? Color.Red
+                            : Color.Green;
 
                 SigsTreeView.Nodes.Add(sigNode);
             }
