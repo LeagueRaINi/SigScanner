@@ -49,15 +49,19 @@
             // 
             // ProcNameTextBox
             // 
+            this.ProcNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ProcNameTextBox.Location = new System.Drawing.Point(8, 235);
             this.ProcNameTextBox.Name = "ProcNameTextBox";
-            this.ProcNameTextBox.Size = new System.Drawing.Size(183, 20);
+            this.ProcNameTextBox.Size = new System.Drawing.Size(184, 20);
             this.ProcNameTextBox.TabIndex = 0;
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(8, 219);
+            this.label1.Location = new System.Drawing.Point(5, 219);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(79, 13);
             this.label1.TabIndex = 1;
@@ -65,6 +69,8 @@
             // 
             // SigPatternTextBox
             // 
+            this.SigPatternTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SigPatternTextBox.Location = new System.Drawing.Point(8, 21);
             this.SigPatternTextBox.Name = "SigPatternTextBox";
             this.SigPatternTextBox.Size = new System.Drawing.Size(196, 20);
@@ -73,16 +79,19 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(5, 5);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(55, 13);
+            this.label2.Size = new System.Drawing.Size(44, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "Signature:";
+            this.label2.Text = "Pattern:";
             // 
             // SearchButton
             // 
-            this.SearchButton.Location = new System.Drawing.Point(296, 230);
+            this.SearchButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SearchButton.Location = new System.Drawing.Point(297, 231);
             this.SearchButton.Name = "SearchButton";
             this.SearchButton.Size = new System.Drawing.Size(83, 26);
             this.SearchButton.TabIndex = 4;
@@ -92,8 +101,9 @@
             // 
             // label3
             // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(111, 44);
+            this.label3.Location = new System.Drawing.Point(101, 44);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(81, 13);
             this.label3.TabIndex = 7;
@@ -101,9 +111,10 @@
             // 
             // ModuleNameTextBox
             // 
-            this.ModuleNameTextBox.Location = new System.Drawing.Point(113, 59);
+            this.ModuleNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ModuleNameTextBox.Location = new System.Drawing.Point(104, 59);
             this.ModuleNameTextBox.Name = "ModuleNameTextBox";
-            this.ModuleNameTextBox.Size = new System.Drawing.Size(91, 20);
+            this.ModuleNameTextBox.Size = new System.Drawing.Size(100, 20);
             this.ModuleNameTextBox.TabIndex = 8;
             this.ToolTip.SetToolTip(this.ModuleNameTextBox, "Leave blank to scan all");
             this.ModuleNameTextBox.Enter += new System.EventHandler(this.ModuleNameTextBox_Enter);
@@ -111,6 +122,8 @@
             // 
             // ProgressBar
             // 
+            this.ProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ProgressBar.Location = new System.Drawing.Point(8, 264);
             this.ProgressBar.Margin = new System.Windows.Forms.Padding(2);
             this.ProgressBar.Name = "ProgressBar";
@@ -119,8 +132,9 @@
             // 
             // InstantSearchCheckBox
             // 
+            this.InstantSearchCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.InstantSearchCheckBox.AutoSize = true;
-            this.InstantSearchCheckBox.Location = new System.Drawing.Point(203, 236);
+            this.InstantSearchCheckBox.Location = new System.Drawing.Point(206, 237);
             this.InstantSearchCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.InstantSearchCheckBox.Name = "InstantSearchCheckBox";
             this.InstantSearchCheckBox.Size = new System.Drawing.Size(85, 17);
@@ -131,6 +145,7 @@
             // 
             // AddSigButton
             // 
+            this.AddSigButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.AddSigButton.Location = new System.Drawing.Point(209, 21);
             this.AddSigButton.Margin = new System.Windows.Forms.Padding(2);
             this.AddSigButton.Name = "AddSigButton";
@@ -142,11 +157,13 @@
             // 
             // SigMaskTextBox
             // 
+            this.SigMaskTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SigMaskTextBox.Enabled = false;
             this.SigMaskTextBox.Location = new System.Drawing.Point(8, 59);
             this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.SigMaskTextBox.Name = "SigMaskTextBox";
-            this.SigMaskTextBox.Size = new System.Drawing.Size(100, 20);
+            this.SigMaskTextBox.Size = new System.Drawing.Size(91, 20);
             this.SigMaskTextBox.TabIndex = 13;
             this.SigMaskTextBox.TextChanged += new System.EventHandler(this.SigMaskTextBox_TextChanged);
             this.SigMaskTextBox.Enter += new System.EventHandler(this.SigMaskTextBox_Enter);
@@ -155,6 +172,8 @@
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(5, 44);
             this.label4.Name = "label4";
@@ -164,6 +183,7 @@
             // 
             // RemoveButton
             // 
+            this.RemoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.RemoveButton.Location = new System.Drawing.Point(296, 21);
             this.RemoveButton.Margin = new System.Windows.Forms.Padding(2);
             this.RemoveButton.Name = "RemoveButton";
@@ -175,6 +195,7 @@
             // 
             // ClearAllButton
             // 
+            this.ClearAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ClearAllButton.Location = new System.Drawing.Point(296, 53);
             this.ClearAllButton.Margin = new System.Windows.Forms.Padding(2);
             this.ClearAllButton.Name = "ClearAllButton";
@@ -190,6 +211,9 @@
             // 
             // SigsTreeView
             // 
+            this.SigsTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.SigsTreeView.Location = new System.Drawing.Point(8, 85);
             this.SigsTreeView.Name = "SigsTreeView";
             this.SigsTreeView.Size = new System.Drawing.Size(371, 127);
@@ -216,7 +240,7 @@
             this.Controls.Add(this.SigPatternTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.ProcNameTextBox);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.MinimumSize = new System.Drawing.Size(406, 326);
             this.Name = "MainForm";
             this.Text = "Simple SigScanner";
             this.Load += new System.EventHandler(this.MainForm_Load);

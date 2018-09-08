@@ -24,6 +24,8 @@ namespace SigScanner
             _lastProcess = null;
             _sigList = new List<Signature>();
 
+            Text = $"Simple SigScanner - Build: {(Environment.Is64BitProcess ? "x64" : "x32")}";
+
             ModuleNameTextBox.Text = "Scan all";
             ModuleNameTextBox.ForeColor = SystemColors.GrayText;
 
@@ -223,7 +225,9 @@ namespace SigScanner
                 var sigObj = _sigList.Where(x => x.Pattern.Equals(parentNode.Parent.Text)).FirstOrDefault();
                 if (sigObj != null)
                     if (sigObj.Offsets.TryGetValue(parentNode.Text, out var offsets))
-                        offsets.Remove((IntPtr)Convert.ToInt32(selectedNodeText, 16));
+                        offsets.Remove((IntPtr)(Environment.Is64BitProcess
+                            ? Convert.ToInt64(selectedNodeText, 16)
+                            : Convert.ToInt32(selectedNodeText, 16)));
             }
             else
             {
