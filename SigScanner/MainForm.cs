@@ -255,9 +255,6 @@ namespace SigScanner
         {
             SigsTreeView.Nodes.Clear();
 
-            var sigNodeColor = Color.Black;
-            var moduleNodeColor = Color.Black;
-
             foreach (var sig in _sigList)
             {
                 var sigNode = new TreeNode(sig.Pattern);

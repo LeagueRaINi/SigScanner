@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace SigScanner.Helpers
 {
@@ -15,26 +15,27 @@ namespace SigScanner.Helpers
                 return addressList;
             }
 
-            var sigByteArray = sig.Bytes.ToArray();
-            foreach (var address in Search(moduleBuffer, sigByteArray, sig.MaskBool, GetBadMatchingTable(sigByteArray)))
+            foreach (var address in Search(moduleBuffer, sig.Bytes.ToArray(), sig.MaskBool, GetBadMatchingsTable(sig)))
                 addressList.Add(IntPtr.Add(baseAddress, address));
 
             return addressList;
         }
 
-        // INFO:
-        // - 99% sure that this isnt 100% correct cause it skips the address where our pattern is supposed to be
-        // - it can also be improved
-        private static int[] GetBadMatchingTable(byte[] pattern)
+        private static int[] GetBadMatchingsTable(Signature sig)
         {
-            var badMatchingTable = new int[256];
+            var badMatchingsTable = new int[256];
+            var lastPatternByteIndex = sig.Bytes.Count - 1;
+
+            var diff = lastPatternByteIndex - Array.LastIndexOf(sig.MaskBool, false);
+            if (diff == 0)
+                diff = 1;
 
             for (int i = 0; i < 256; i++)
-                badMatchingTable[i] = pattern.Length;
-            for (int i = 0; i < pattern.Length - 1; i++)
-                badMatchingTable[pattern[i] & 0xFF] = pattern.Length - i - 1;
+                badMatchingsTable[i] = diff;
+            for (int i = 0; i < lastPatternByteIndex; i++)
+                badMatchingsTable[sig.Bytes[i] & 0xFF] = lastPatternByteIndex - i;
 
-            return badMatchingTable;
+            return badMatchingsTable;
         }
 
         private static List<int> Search(byte[] haystack, byte[] needle, bool[] mask, int[] badMatchingTable)
@@ -52,8 +53,7 @@ namespace SigScanner.Helpers
                         break;
                     }
 
-                //index += badMatchingTable[haystack[index + lastPatternByteIndex] & 0xFF];
-                index++; // temp fix!
+                index += badMatchingTable[haystack[index + lastPatternByteIndex] & 0xFF];
             }
 
             return addresses;

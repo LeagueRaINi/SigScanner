@@ -91,18 +91,20 @@ namespace SigScanner.Helpers
             {
                 case SigType.IDA:
                     foreach (var hex in pattern.Split(' '))
-                        bytes.Add(hex.Equals("?") || hex.Equals("??")
+                        bytes.Add(hex.Contains("?")
                             ? (byte)0x0
                             : Convert.ToByte(hex, 16));
-                    return bytes;
+                    break;
                 case SigType.CODE:
                     var strippedPattern = pattern.Replace("\\x", "");
                     for (int i = 0; i < mask.Length; i++)
                         bytes.Add(Convert.ToByte(strippedPattern.Substring(i * 2, 2), 16));
-                    return bytes;
+                    break;
                 default:
-                    return bytes;
+                    break;
             }
+
+            return bytes;
         }
 
         public static bool[] GetMaskBool(SigType type, string mask, string pattern = "")

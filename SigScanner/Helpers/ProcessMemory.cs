@@ -147,11 +147,17 @@ namespace SigScanner.Helpers
                 return;
             }
 
-            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan All"))
+            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan all"))
                 moduleList.Add(GetModule(sig.ModuleName));
             else
                 foreach (ProcessModule processModule in this.Process.Modules)
+                {
+                    // TODO: check if dll is not a system dll
+                    if (string.Compare(processModule.ModuleName, "KERNEL32.dll", true) == 0)
+                        continue;
+
                     moduleList.Add(processModule);
+                }
 
             if (moduleList.Count == 0)
             {
