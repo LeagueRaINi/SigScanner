@@ -26,9 +26,12 @@ namespace SigScanner.Helpers
             var badMatchingsTable = new int[256];
             var lastPatternByteIndex = sig.Bytes.Count - 1;
 
-            var diff = lastPatternByteIndex - Array.LastIndexOf(sig.MaskBool, false);
-            if (diff == 0)
-                diff = 1;
+			var lastDiff = lastPatternByteIndex - Array.LastIndexOf(sig.MaskBool, false);
+			var firstDiff = lastPatternByteIndex - Array.IndexOf(sig.MaskBool, false);
+
+			var diff = firstDiff > lastDiff ? firstDiff : lastDiff;
+			if (diff == 0)
+				diff = 1;
 
             for (int i = 0; i < 256; i++)
                 badMatchingsTable[i] = diff;
