@@ -49,6 +49,20 @@ namespace SigScanner.Helpers
             return addressList;
         }
 
+        public static List<IntPtr> FindPatternSunday(byte[] moduleBuffer, Signature sig, IntPtr baseAddress)
+        {
+            List<IntPtr> addressList = new List<IntPtr>();
+
+            // invalid signature
+            if (sig.Type == Signature.SigType.UNKNOWN)
+                return addressList;
+
+            SundaySearch(moduleBuffer, sig.Bytes.ToArray(), sig.GetMaskBool()).ForEach(a =>
+                addressList.Add(IntPtr.Add(baseAddress, a)));
+
+            return addressList;
+        }
+
         private static bool SequenceCheck(byte[] buffer, int offset, List<byte> pattern, string mask)
         {
             for (int x = 0; x < pattern.Count; x++)
@@ -134,6 +148,54 @@ namespace SigScanner.Helpers
             }
 
             return -1;
+        }
+
+        private static List<int> SundaySearch(byte[] haystack, byte[] needle, bool[] mask)
+        {
+            int i = 0;
+            int needleLength = needle.Length;
+            int haystackLength = haystack.Length;
+            int[] occ = new int[256];
+
+            List<int> addressList = new List<int>();
+
+            bool MatchesAt(int pos)
+            {
+                int index = 0;
+
+                while (index < needleLength && (!mask[index] || needle[index] == haystack[pos + index]))
+                    index++;
+
+                return index == needleLength;
+            }
+
+            void OccInit()
+            {
+                int a;
+
+                for (a = 0; a < 256; a++)
+                    occ[a] = -1;
+
+                for (int ji = 0; ji < needleLength; ji++)
+                {
+                    a = needle[ji];
+                    occ[a] = ji;
+                }
+            }
+
+            OccInit();
+
+            while (i <= haystackLength - needleLength)
+            {
+                if (MatchesAt(i))
+                    addressList.Add(i);
+
+                i += needleLength;
+                if (i < haystackLength)
+                    i -= occ[haystack[i]];
+            }
+
+            return addressList;
         }
     }
 }
