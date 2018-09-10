@@ -141,7 +141,7 @@ namespace SigScanner.Helpers
 
             //memList = DumpModule(sig.ModuleName);
 
-            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan All"))
+            if (!String.IsNullOrEmpty(sig.ModuleName) && !sig.ModuleName.ToLower().Equals("Scan All".ToLower()))
             {
                 moduleList.Add(FindModule(sig.ModuleName));
             }

@@ -120,14 +120,20 @@ namespace SigScanner.Helpers
             void OccInit()
             {
                 int a;
+                int idx;
+                int last = needleLength - 1;
+
+                // Get last wildcard position
+                for (idx = last; idx > 0 && mask[idx]; --idx) ;
+                int diff = last - idx;
 
                 for (a = 0; a < 256; a++)
-                    occ[a] = -1;
+                    occ[a] = diff;
 
-                for (j = 0; j < needleLength - 1; j++)
+                for (j = 0; j < last; j++)
                 {
                     a = needle[j];
-                    occ[a] = j;
+                    occ[a] = last - j;
                 }
             }
 
@@ -150,7 +156,7 @@ namespace SigScanner.Helpers
             return -1;
         }
 
-        private static List<int> SundaySearch(byte[] haystack, byte[] needle, bool[] mask)
+        public static List<int> SundaySearch(byte[] haystack, byte[] needle, bool[] mask)
         {
             int i = 0;
             int needleLength = needle.Length;
@@ -172,14 +178,23 @@ namespace SigScanner.Helpers
             void OccInit()
             {
                 int a;
+                int idx;
+                int last = needleLength - 1;
+
+                // Get last wildcard position
+                for (idx = last; idx > 0 && mask[idx]; --idx) ;
+                int diff = last - idx;
+
+                if (diff == 0)
+                    diff = 1;
 
                 for (a = 0; a < 256; a++)
-                    occ[a] = -1;
+                    occ[a] = diff;
 
                 for (int ji = 0; ji < needleLength; ji++)
                 {
                     a = needle[ji];
-                    occ[a] = ji;
+                    occ[a] = diff - ji;
                 }
             }
 
@@ -188,7 +203,11 @@ namespace SigScanner.Helpers
             while (i <= haystackLength - needleLength)
             {
                 if (MatchesAt(i))
+                {
                     addressList.Add(i);
+                    i++;
+                    continue;
+                }
 
                 i += needleLength;
                 if (i < haystackLength)

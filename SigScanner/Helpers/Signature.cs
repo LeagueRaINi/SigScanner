@@ -122,12 +122,9 @@ namespace SigScanner.Helpers
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach (var b in Bytes)
+            foreach (var hex in Pattern.Split(' '))
             {
-                if (b == 0)
-                    sb.Append('?');
-                else
-                    sb.Append('x');
+                sb.Append(hex.Contains('?') ? '?' : 'x');
             }
 
             Mask = sb.ToString();
