@@ -18,29 +18,31 @@ namespace SigScanner.Helpers
 
         public string Pattern { get; private set; }
         public string Mask { get; private set; }
-        public bool[] MaskBool { get; private set; }
+        public bool[] MaskBool { get; set; }
         public SigType Type { get; private set; }
         public List<byte> Bytes { get; private set; }
         public string ModuleName { get; private set; }
         public Dictionary<string, List<IntPtr>> Offsets { get; set; }
 
-        private static Regex _idaRegex = new Regex(@"(\s?[a-fA-F0-9?]{1,2}\s?)");
-        private static Regex _codeRegex = new Regex(@"(\\x)([a-fA-F0-9]{1,2})");
+        private static readonly Regex _idaRegex = new Regex(@"(\s?[a-fA-F0-9?]{1,2}\s?)");
+        private static readonly Regex _codeRegex = new Regex(@"(\\x)([a-fA-F0-9]{1,2})");
 
         public Signature(string moduleName, string pattern, string mask = "")
         {
             this.Pattern = pattern;
-            this.Mask = mask;
             this.ModuleName = moduleName;
             this.Type = GetSigType(pattern, mask, true);
             this.Bytes = GetSigBytes(this.Type, pattern, mask);
-            this.MaskBool = GetMaskBool(this.Type, mask, pattern);
+            this.MaskBool = GetMaskBool(this.Type, ref mask, pattern);
+            this.Mask = mask;
             this.Offsets = new Dictionary<string, List<IntPtr>>();
+
+
         }
 
         public bool IsValid()
         {
-            return this.Type != SigType.UNKNOWN && this.Bytes.Any();
+            return this.Type != SigType.UNKNOWN && this.Bytes.Any() && IsValidMaskFormat(this.Mask);
         }
 
         public static bool IsValidMaskFormat(string mask)
@@ -107,7 +109,7 @@ namespace SigScanner.Helpers
             return bytes;
         }
 
-        public static bool[] GetMaskBool(SigType type, string mask, string pattern = "")
+        public static bool[] GetMaskBool(SigType type, ref string mask, string pattern = "")
         {
             if (type == SigType.IDA && !string.IsNullOrEmpty(pattern))
             {
