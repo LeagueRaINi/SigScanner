@@ -65,7 +65,8 @@ namespace SigScanner
 
             this.UpdateTreeView();
 
-            MessageBox.Show("Finished", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // use ProgressBar instead to depict status
+            //MessageBox.Show("Finished", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void SigsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
@@ -82,13 +83,6 @@ namespace SigScanner
             var textBox = sender as TextBox;
 
             SigMaskTextBox.Enabled = textBox.Text.Contains(@"\x");
-        }
-
-        private void CheckAllModuleCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            var checkBox = sender as CheckBox;
-
-            ModuleNameTextBox.Enabled = !checkBox.Checked;
         }
 
         private void AddSigButton_Click(object sender, EventArgs e)
