@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -11,14 +10,13 @@ namespace SigScanner.Helpers
     {
         public enum SigType
         {
-            IDA,
-            CODE,
-            UNKNOWN
+            Ida,
+            Code,
+            Unknown
         }
 
         public string Pattern { get; private set; }
-        public string Mask { get; private set; }
-        public bool[] MaskBool { get; set; }
+        public bool[] MaskBool { get; private set; }
         public SigType Type { get; private set; }
         public List<byte> Bytes { get; private set; }
         public string ModuleName { get; private set; }
@@ -31,96 +29,89 @@ namespace SigScanner.Helpers
         {
             this.Pattern = pattern;
             this.ModuleName = moduleName;
-            this.Type = GetSigType(pattern, mask, true);
+            this.Type = GetSigType(pattern, mask);
             this.Bytes = GetSigBytes(this.Type, pattern, mask);
-            this.MaskBool = GetMaskBool(this.Type, ref mask, pattern);
-            this.Mask = mask;
+            this.MaskBool = GetMaskBool(this.Type, mask, pattern);
             this.Offsets = new Dictionary<string, List<IntPtr>>();
-
-
         }
 
         public bool IsValid()
         {
-            return this.Type != SigType.UNKNOWN && this.Bytes.Any() && IsValidMaskFormat(this.Mask);
+            return this.Type != SigType.Unknown && this.Bytes.Any();
         }
 
-        public static bool IsValidMaskFormat(string mask)
+        private static bool IsValidMaskFormat(int patternBytes, string mask)
         {
             if (string.IsNullOrEmpty(mask))
                 return false;
 
-            foreach (char charr in mask)
-                if (!charr.Equals('x') && !charr.Equals('?'))
+            foreach (var c in mask)
+                if (!c.Equals('x') && !c.Equals('?'))
                     return false;
 
-            return true;
+            return patternBytes == mask.Length;
         }
 
-        public static SigType GetSigType(string pattern, string mask = "", bool showError = false)
+        private static SigType GetSigType(string pattern, string mask = "")
         {
             var idaMatches = _idaRegex.Matches(pattern);
             if (idaMatches.Count > pattern.Length / 3)
             {
                 var splitPattern = pattern.Split(' ');
-                if (splitPattern.Count() == idaMatches.Count)
-                    return SigType.IDA;
+                if (splitPattern.Length == idaMatches.Count)
+                    return SigType.Ida;
             }
 
             var codeMatches = _codeRegex.Matches(pattern);
-            if (codeMatches.Count == (pattern.Length / 4))
+            if (codeMatches.Count == pattern.Length / 4)
             {
-                if (IsValidMaskFormat(mask))
-                    return SigType.CODE;
+                if (IsValidMaskFormat(codeMatches.Count, mask))
+                    return SigType.Code;
 
-                // TODO: logger?
-                if (showError)
-                    MessageBox.Show("Invalid Mask", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.ShowError("Invalid Mask");
             }
 
-            // TODO: logger?
-            if (showError)
-                MessageBox.Show("Unknown Pattern format", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Logger.ShowError("Unknown Pattern format");
 
-            return SigType.UNKNOWN;
+            return SigType.Unknown;
         }
 
-        public static List<byte> GetSigBytes(SigType type, string pattern, string mask = "")
+        private static List<byte> GetSigBytes(SigType type, string pattern, string mask = "")
         {
             var bytes = new List<byte>();
 
             switch (type)
             {
-                case SigType.IDA:
-                    foreach (var hex in pattern.Split(' '))
-                        bytes.Add(hex.Contains("?")
-                            ? (byte)0x0
+                case SigType.Ida:
+                    bytes.AddRange(from hex in pattern.Split(' ')
+                        select hex.Contains("?")
+                            ? (byte) 0x0
                             : Convert.ToByte(hex, 16));
                     break;
-                case SigType.CODE:
+                case SigType.Code:
                     var strippedPattern = pattern.Replace("\\x", "");
-                    for (int i = 0; i < mask.Length; i++)
+                    for (var i = 0; i < mask.Length; i++)
                         bytes.Add(Convert.ToByte(strippedPattern.Substring(i * 2, 2), 16));
                     break;
-                default:
+                case SigType.Unknown:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
             return bytes;
         }
 
-        public static bool[] GetMaskBool(SigType type, ref string mask, string pattern = "")
+        private static bool[] GetMaskBool(SigType type, string mask, string pattern = "")
         {
-            if (type == SigType.IDA && !string.IsNullOrEmpty(pattern))
-            {
-                var sb = new StringBuilder();
-                foreach (var hex in pattern.Split(' '))
-                    sb.Append(hex.Equals("?") || hex.Equals("??") ? '?' : 'x');
+            if (type != SigType.Ida || string.IsNullOrEmpty(pattern))
+                return mask.Select(x => x == 'x').ToArray();
 
-                mask = sb.ToString();
-            }
+            var sb = new StringBuilder();
+            foreach (var hex in pattern.Split(' '))
+                sb.Append(hex.Equals("?") || hex.Equals("??") ? '?' : 'x');
 
-            return mask.Select(x => x == 'x').ToArray();
+            return sb.ToString().Select(x => x == 'x').ToArray();
         }
     }
 }

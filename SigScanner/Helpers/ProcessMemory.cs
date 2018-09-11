@@ -1,25 +1,42 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Forms;
+using SigScanner.Helpers.Natives;
 
 namespace SigScanner.Helpers
 {
     public class ProcessMemory : IDisposable
     {
+        public string Name { get; private set; }
         public Process Process { get; private set; }
-        public string ProcessName { get; private set; }
-        public IntPtr ProcessHandle { get; private set; }
-        public bool Disposed { get; private set; }
+        public IntPtr Handle { get; private set; }
         public Dictionary<ProcessModule, byte[]> ModuleCache { get; private set; }
+        public bool Disposed { get; private set; }
 
-        public ProcessMemory(string processName, Natives.Enums.ProcessAccessFlags handleAccess)
+        public ProcessMemory(string procName)
         {
-            this.ProcessName = processName;
+            if (string.IsNullOrEmpty(procName))
+                throw new Exception("Failed to initialise ProcessMemory. Process Name was invalid");
+
+            this.Name = procName;
+            this.Process = GetProcess(procName);
             this.ModuleCache = new Dictionary<ProcessModule, byte[]>();
 
-            this.GetProcess(handleAccess);
+            if (IsValidProcess(this.Process))
+                this.Handle = OpenHandle(this.Process, Enums.ProcessAccessFlags.VirtualMemoryRead);
+        }
+
+        public ProcessMemory(Process proc)
+        {
+            if (!IsValidProcess(proc))
+                throw new Exception("Failed to initialise ProcessMemory. Process was invalid");
+
+            this.Name = proc.ProcessName;
+            this.Process = proc;
+            this.Handle = OpenHandle(proc, Enums.ProcessAccessFlags.VirtualMemoryRead);
+            this.ModuleCache = new Dictionary<ProcessModule, byte[]>();
         }
 
         ~ProcessMemory()
@@ -43,142 +60,60 @@ namespace SigScanner.Helpers
                 // Free any managed objects here.
                 //
 
-                this.CloseHandle();
+                if (this.IsValid())
+                    Imports.CloseHandle(this.Handle);
             }
 
             // Free any unmanaged objects here.
             //
 
-            if (this.ModuleCache != null)
-                this.ModuleCache.Clear();
+            this.ModuleCache?.Clear();
 
             this.Disposed = true;
         }
 
-        public bool IsAlive()
+        public bool IsValid()
         {
-            return this.Process != null && !this.Process.HasExited;
+            return IsValidProcess(this.Process) && this.HasHandle();
         }
 
         public bool HasHandle()
         {
-            return this.ProcessHandle != null && this.ProcessHandle != IntPtr.Zero;
+            return this.Handle != IntPtr.Zero;
         }
 
-        public void GetProcess(Natives.Enums.ProcessAccessFlags handleAccess)
+        public void Refresh()
         {
-            if (this.IsAlive() && this.HasHandle())
+            if (IsValidProcess(this.Process))
+                return;
+            if ((this.Process = GetProcess(this.Name)) == null)
                 return;
 
-            this.Process = null;
-            this.ProcessHandle = IntPtr.Zero;
+            this.Handle = OpenHandle(this.Process, Enums.ProcessAccessFlags.VirtualMemoryRead);
             this.ModuleCache.Clear();
-
-            if (!DoesProcessExist(this.ProcessName, out var processList))
-            {
-                MessageBox.Show($"Could not find Process: {this.ProcessName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (processList.Count() > 1 &&
-                MessageBox.Show(
-                    $"Found {processList.Count()} Processes with the Name {this.ProcessName}. Do you want to select one or let me pick a random one?",
-                    "Warning!",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning) == DialogResult.Yes)
-            {
-                var processSelection = new ProcessSelectForm(processList);
-
-                processSelection.FormClosing += (sender, e) =>
-                {
-                    var form = sender as ProcessSelectForm;
-                    if (form.SelectedProcess != null)
-                        this.Process = form.SelectedProcess;
-                };
-
-                processSelection.ShowDialog();
-
-                if (!this.IsAlive())
-                {
-                    MessageBox.Show("Selected Process is invalid or has exited", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-            else
-                this.Process = processList.FirstOrDefault();
-
-            this.ProcessHandle = Natives.Imports.OpenProcess(handleAccess, false, this.Process.Id);
-
-            if (this.ProcessHandle == IntPtr.Zero)
-                MessageBox.Show($"Could not Open Handle to Process: {this.ProcessName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        public void CloseHandle()
-        {
-            if (!this.IsAlive() || !this.HasHandle())
-                return;
-
-            Natives.Imports.CloseHandle(this.ProcessHandle);
         }
 
         public ProcessModule GetModule(string moduleName)
         {
-            if (!this.IsAlive())
+            if (!IsValidProcess(this.Process))
             {
-                MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.ShowError("Failed to get Module. Process is invalid");
                 return null;
             }
 
+            var cachedModule = this.ModuleCache.Keys.FirstOrDefault(x => string.Compare(x.ModuleName, moduleName, StringComparison.OrdinalIgnoreCase) == 0);
+            if (cachedModule != null)
+                return cachedModule;
+
             foreach (ProcessModule module in this.Process.Modules)
-                if (module.ModuleName.ToLower().Equals(moduleName.ToLower()))
-                    return module;
-
-            MessageBox.Show($"Failed to find Module: {moduleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return null;
-        }
-
-        public void GetSignatureAddresses(Signature sig)
-        {
-            var moduleList = new List<ProcessModule>();
-
-            if (!this.IsAlive())
-            {
-                MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (sig.ModuleName != null && !sig.ModuleName.Equals("Scan all"))
-                moduleList.Add(GetModule(sig.ModuleName));
-            else
-                foreach (ProcessModule processModule in this.Process.Modules)
+                if (string.Compare(module.ModuleName, moduleName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    // TODO: check if dll is not a system dll
-                    if (string.Compare(processModule.ModuleName, "KERNEL32.dll", true) == 0)
-                        continue;
-
-                    moduleList.Add(processModule);
+                    this.ModuleCache.Add(module, new byte[] { });
+                    return module;
                 }
 
-            if (moduleList.Count == 0)
-            {
-                MessageBox.Show("Could not find any Module", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            foreach (var mod in moduleList)
-            {
-                var addresses = BoyerMooreHorspool.FindPattern(this.DumpModule(mod), sig, mod.BaseAddress);
-                if (addresses.Count > 0)
-                    if (sig.Offsets.TryGetValue(mod.ModuleName, out var offsets))
-                    {
-                        offsets.Clear();
-
-                        foreach (var address in addresses)
-                            offsets.Add(address);
-                    }
-                    else
-                        sig.Offsets.Add(mod.ModuleName, addresses);
-            }
+            Logger.ShowError($"Could not find Module: {moduleName}");
+            return null;
         }
 
         public byte[] DumpModule(ProcessModule module)
@@ -186,40 +121,119 @@ namespace SigScanner.Helpers
             if (this.ModuleCache.TryGetValue(module, out var moduleBuffer) && moduleBuffer.Any())
                 return moduleBuffer;
 
-            var buffer = new byte[module.ModuleMemorySize];
-            if (ReadMemory(module.BaseAddress, module.ModuleMemorySize, out buffer))
+            if (ReadMemory(module.BaseAddress, module.ModuleMemorySize, out var buf))
             {
-                this.ModuleCache[module] = buffer;
-                return buffer;
+                this.ModuleCache[module] = buf;
+                return buf;
             }
 
-            MessageBox.Show($"Failed to Dump Module: {module.ModuleName}", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return buffer;
+            Logger.ShowError($"Failed to Dump Module: {module.ModuleName}");
+            return buf;
+        }
+
+        public void GetSignatureAddresses(Signature sig)
+        {
+            var moduleList = new List<ProcessModule>();
+
+            if (!IsValidProcess(this.Process))
+            {
+                Logger.ShowError("Failed to get Signature Addresses. Process is invalid");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(sig.ModuleName) && string.Compare(sig.ModuleName, "Scan all", StringComparison.OrdinalIgnoreCase) != 0)
+                moduleList.Add(GetModule(sig.ModuleName));
+            else
+                foreach (ProcessModule processModule in this.Process.Modules)
+                {
+                    // TODO: check if dll is not a system dll
+                    if (string.Compare(processModule.ModuleName, "KERNEL32.dll", StringComparison.OrdinalIgnoreCase) == 0)
+                        continue;
+
+                    moduleList.Add(processModule);
+                }
+
+            if (moduleList.Count == 0)
+            {
+                Logger.ShowError("Failed to get Signature Addresses. Could not find Modules");
+                return;
+            }
+
+            foreach (var mod in moduleList)
+            {
+                var addresses = BoyerMooreHorspool.FindPattern(this.DumpModule(mod), sig, mod.BaseAddress);
+                if (addresses.Count <= 0)
+                    continue;
+
+                if (sig.Offsets.TryGetValue(mod.ModuleName, out var offsets))
+                {
+                    offsets.Clear();
+
+                    foreach (var address in addresses)
+                        offsets.Add(address);
+                }
+                else
+                    sig.Offsets.Add(mod.ModuleName, addresses);
+            }
         }
 
         public bool ReadMemory(IntPtr address, int size, out byte[] bytes)
         {
             bytes = new byte[size];
 
-            if (!this.IsAlive())
-            {
-                MessageBox.Show("Process is dead", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            if (this.IsValid())
+                return Imports.NtReadVirtualMemory(this.Handle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
 
-            if (!this.HasHandle())
-            {
-                MessageBox.Show("Process Handle is invalid", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+            Logger.ShowError("Failed to read Memory. Process is invalid");
+            return false;
 
-            return Natives.Imports.NtReadVirtualMemory(this.ProcessHandle, address, bytes, size, out var lpNumberOfBytesRead) == 0;
         }
 
-        public static bool DoesProcessExist(string processName, out Process[] processList)
+        public static bool IsValidProcess(Process proc)
         {
-            processList = Process.GetProcessesByName(processName);
-            return processList.Any();
+            return proc != null && !proc.HasExited;
+        }
+
+        public static Process GetProcess(string procName)
+        {
+            var procList = Process.GetProcessesByName(procName);
+            if (procList.Length == 0)
+            {
+                Logger.ShowError($"Could not find Process: {procName}");
+                return null;
+            }
+
+            if (procList.Length == 1
+                || Logger.ShowInfo("Found one or more Processes do you want to select a specific one?", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                return procList.FirstOrDefault();
+
+            var procSelectionForm = new ProcessSelectionForm(procList);
+
+            Process selectedProc = null;
+
+            procSelectionForm.Closing += (sender, args) =>
+            {
+                selectedProc = procSelectionForm.SelectedProcess;
+            };
+
+            procSelectionForm.ShowDialog();
+
+            return selectedProc;
+        }
+
+        public static IntPtr OpenHandle(Process proc, Enums.ProcessAccessFlags accessFlags)
+        {
+            if (!IsValidProcess(proc))
+            {
+                Logger.ShowError("Failed to open Handle. Process is invalid");
+                return IntPtr.Zero;
+            }
+
+            var handle = Imports.OpenProcess(accessFlags, false, proc.Id);
+            if (handle == IntPtr.Zero)
+                Logger.ShowError($"Failed to open Handle to Process: {proc.ProcessName}");
+
+            return handle;
         }
     }
 }

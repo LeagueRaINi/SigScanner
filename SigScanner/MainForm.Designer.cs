@@ -43,8 +43,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.RemoveButton = new System.Windows.Forms.Button();
             this.ClearAllButton = new System.Windows.Forms.Button();
-            this.ToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.InfoToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SigsTreeView = new System.Windows.Forms.TreeView();
+            this.ErrorToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // ProcNameTextBox
@@ -75,7 +76,7 @@
             this.SigPatternTextBox.Name = "SigPatternTextBox";
             this.SigPatternTextBox.Size = new System.Drawing.Size(196, 20);
             this.SigPatternTextBox.TabIndex = 2;
-            this.SigPatternTextBox.TextChanged += new System.EventHandler(this.SigTextBox_TextChanged);
+            this.SigPatternTextBox.TextChanged += new System.EventHandler(this.SigPatternTextBox_TextChanged);
             // 
             // label2
             // 
@@ -112,11 +113,13 @@
             // ModuleNameTextBox
             // 
             this.ModuleNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ModuleNameTextBox.ForeColor = System.Drawing.Color.Gray;
             this.ModuleNameTextBox.Location = new System.Drawing.Point(104, 59);
             this.ModuleNameTextBox.Name = "ModuleNameTextBox";
             this.ModuleNameTextBox.Size = new System.Drawing.Size(100, 20);
             this.ModuleNameTextBox.TabIndex = 8;
-            this.ToolTip.SetToolTip(this.ModuleNameTextBox, "Leave blank to scan all");
+            this.ModuleNameTextBox.Text = "Scan all";
+            this.InfoToolTip.SetToolTip(this.ModuleNameTextBox, "Leave blank to Scan all Modules");
             this.ModuleNameTextBox.Enter += new System.EventHandler(this.ModuleNameTextBox_Enter);
             this.ModuleNameTextBox.Leave += new System.EventHandler(this.ModuleNameTextBox_Leave);
             // 
@@ -141,7 +144,7 @@
             this.InstantSearchCheckBox.TabIndex = 11;
             this.InstantSearchCheckBox.Text = "Auto Search";
             this.InstantSearchCheckBox.UseVisualStyleBackColor = true;
-            this.InstantSearchCheckBox.CheckedChanged += new System.EventHandler(this.imSearchCheckbox_CheckedChanged);
+            this.InstantSearchCheckBox.CheckedChanged += new System.EventHandler(this.InstantSearchCheckBox_CheckedChanged);
             // 
             // AddSigButton
             // 
@@ -160,11 +163,13 @@
             this.SigMaskTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.SigMaskTextBox.Enabled = false;
+            this.SigMaskTextBox.ForeColor = System.Drawing.Color.Gray;
             this.SigMaskTextBox.Location = new System.Drawing.Point(8, 59);
             this.SigMaskTextBox.Margin = new System.Windows.Forms.Padding(2);
             this.SigMaskTextBox.Name = "SigMaskTextBox";
             this.SigMaskTextBox.Size = new System.Drawing.Size(91, 20);
             this.SigMaskTextBox.TabIndex = 13;
+            this.SigMaskTextBox.Text = "[xx??xx]";
             this.SigMaskTextBox.TextChanged += new System.EventHandler(this.SigMaskTextBox_TextChanged);
             this.SigMaskTextBox.Enter += new System.EventHandler(this.SigMaskTextBox_Enter);
             this.SigMaskTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.SigMaskTextBox_KeyPress);
@@ -205,9 +210,14 @@
             this.ClearAllButton.UseVisualStyleBackColor = true;
             this.ClearAllButton.Click += new System.EventHandler(this.ClearAllButton_Click);
             // 
-            // ToolTip
+            // InfoToolTip
             // 
-            this.ToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.InfoToolTip.AutoPopDelay = 1000;
+            this.InfoToolTip.InitialDelay = 50;
+            this.InfoToolTip.IsBalloon = true;
+            this.InfoToolTip.ReshowDelay = 100;
+            this.InfoToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.InfoToolTip.ToolTipTitle = "Info";
             // 
             // SigsTreeView
             // 
@@ -218,7 +228,16 @@
             this.SigsTreeView.Name = "SigsTreeView";
             this.SigsTreeView.Size = new System.Drawing.Size(371, 127);
             this.SigsTreeView.TabIndex = 17;
-            this.SigsTreeView.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.SigsTreeView_NodeMouseDoubleClick);
+            this.SigsTreeView.DoubleClick += new System.EventHandler(this.SigsTreeView_DoubleClick);
+            // 
+            // ErrorToolTip
+            // 
+            this.ErrorToolTip.AutoPopDelay = 1000;
+            this.ErrorToolTip.InitialDelay = 50;
+            this.ErrorToolTip.IsBalloon = true;
+            this.ErrorToolTip.ReshowDelay = 100;
+            this.ErrorToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+            this.ErrorToolTip.ToolTipTitle = "Error";
             // 
             // MainForm
             // 
@@ -265,8 +284,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button RemoveButton;
         private System.Windows.Forms.Button ClearAllButton;
-        private System.Windows.Forms.ToolTip ToolTip;
+        private System.Windows.Forms.ToolTip InfoToolTip;
         private System.Windows.Forms.TreeView SigsTreeView;
+        private System.Windows.Forms.ToolTip ErrorToolTip;
     }
 }
 

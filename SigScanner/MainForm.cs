@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,8 +14,8 @@ namespace SigScanner
 {
     public partial class MainForm : Form
     {
-        private ProcessMemory _lastProcess;
-        private List<Signature> _sigList;
+        private ProcessMemory _lastProcess { get; set; }
+        private List<Signature> _sigList { get; set; }
 
         public MainForm()
         {
@@ -21,68 +24,105 @@ namespace SigScanner
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.Text = $@"SigScanSharp - {(Environment.Is64BitProcess ? "x64" : "x32")} Build";
+
             _lastProcess = null;
             _sigList = new List<Signature>();
-
-            Text = $@"Simple SigScanner - {(Environment.Is64BitProcess ? "x64" : "x32")} Build";
-
-            ModuleNameTextBox.Text = @"Scan all";
-            ModuleNameTextBox.ForeColor = SystemColors.GrayText;
-
-            SigMaskTextBox.Text = @"[xx??xx]";
-            SigMaskTextBox.ForeColor = SystemColors.GrayText;
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
+        private void SigPatternTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (!_sigList.Any())
-            {
-                MessageBox.Show("There are no Signatures?", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!(sender is TextBox textBox))
                 return;
-            }
 
-            if (!ProcNameTextBox.Text.Any())
-            {
-                MessageBox.Show("Process Name cannot be empty!", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (_lastProcess == null || _lastProcess.ProcessName != ProcNameTextBox.Text)
-                _lastProcess = new ProcessMemory(ProcNameTextBox.Text, Helpers.Natives.Enums.ProcessAccessFlags.VirtualMemoryRead);
-            else
-                if (!_lastProcess.IsAlive() || !_lastProcess.HasHandle())
-                    _lastProcess.GetProcess(Helpers.Natives.Enums.ProcessAccessFlags.VirtualMemoryRead);
-
-            if (!_lastProcess.IsAlive())
-            {
-                _lastProcess.Dispose();
-                return;
-            }
-
-            Parallel.ForEach(_sigList, (sig) => {
-                _lastProcess.GetSignatureAddresses(sig);
-            });
-
-            this.UpdateTreeView();
-
-            // use ProgressBar instead to depict status
-            //MessageBox.Show("Finished", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            SigMaskTextBox.Enabled = textBox.Text.Contains(@"\x");
         }
 
-        private void SigsTreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void InstantSearchCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            var treeView = sender as TreeView;
+            SearchButton.Text = sender is CheckBox checkBox && checkBox.Checked
+                ? "Refresh"
+                : "Search";
+        }
+
+        private void ModuleNameTextBox_Enter(object sender, EventArgs e)
+        {
+            if (!(sender is TextBox textBox))
+                return;
+            if (!textBox.Text.Equals("Scan all"))
+                return;
+
+            textBox.Clear();
+            textBox.ForeColor = SystemColors.WindowText;
+        }
+
+        private void ModuleNameTextBox_Leave(object sender, EventArgs e)
+        {
+            if (!(sender is TextBox textBox))
+                return;
+            if (textBox.Text.Any())
+                return;
+
+            textBox.Text = @"Scan all";
+            textBox.ForeColor = SystemColors.GrayText;
+        }
+
+        private void SigMaskTextBox_Enter(object sender, EventArgs e)
+        {
+            if (!(sender is TextBox textBox))
+                return;
+            if (!textBox.Text.Equals(@"[xx??xx]"))
+                return;
+
+            textBox.Clear();
+            textBox.ForeColor = SystemColors.WindowText;
+        }
+
+        private void SigMaskTextBox_Leave(object sender, EventArgs e)
+        {
+            if (!(sender is TextBox textBox))
+                return;
+            if (textBox.Text.Any())
+                return;
+
+            textBox.Text = @"[xx??xx]";
+            textBox.ForeColor = SystemColors.GrayText;
+        }
+
+        private void SigMaskTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (char.IsControl(e.KeyChar))
+                return;
+            if (Regex.IsMatch(e.KeyChar.ToString(), @"[x?]"))
+                return;
+
+            ErrorToolTip.Show("Only valid Characters like 'x' or '?' are allowed", SigMaskTextBox, 1000);
+
+            e.Handled = true;
+        }
+
+        private void SigMaskTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (!(sender is TextBox textBox))
+                return;
+            if (textBox.Text.Equals(@"[xx??xx]"))
+                return;
+            if (Regex.Matches(textBox.Text, @"[x?]").Count == textBox.Text.Length)
+                return;
+
+            textBox.Clear();
+
+            ErrorToolTip.Show("Only valid Characters like 'x' or '?' are allowed", textBox, 1000);
+        }
+
+        private void SigsTreeView_DoubleClick(object sender, EventArgs e)
+        {
+            if (!(sender is TreeView treeView))
+                return;
 
             Clipboard.SetText(treeView.SelectedNode.Text);
 
-            ToolTip.Show("Copied to Clipboard!", ActiveForm, PointToClient(MousePosition), 500);
-        }
-
-        private void SigTextBox_TextChanged(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            SigMaskTextBox.Enabled = textBox.Text.Contains(@"\x");
+            InfoToolTip.Show("Copied to Clipboard!", treeView, 500);
         }
 
         private void AddSigButton_Click(object sender, EventArgs e)
@@ -96,22 +136,20 @@ namespace SigScanner
 
             if (sigPattern.Length < 5 || (SigMaskTextBox.Enabled && sigMask.Length < 5))
             {
-                MessageBox.Show("Sig Pattern or Mask is to small", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.ShowError("Sig Pattern or Mask is to small");
                 return;
             }
 
-            var sigListObj = _sigList.FirstOrDefault(x => String.Compare(x.Pattern, sigPattern,
-                                                              StringComparison.OrdinalIgnoreCase) == 0);
+            var sigListObj = _sigList.FirstOrDefault(x => string.Compare(x.Pattern, sigPattern, StringComparison.OrdinalIgnoreCase) == 0);
             if (sigListObj != null)
             {
                 if (sigListObj.Offsets.Keys.Contains(sigModuleName))
                 {
-                    MessageBox.Show("Sig with this Pattern already exists for this Module", "Error!",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Logger.ShowError("Sig with this Pattern already exists for this Module");
                     return;
                 }
-                else
-                    sigListObj.Offsets.Add(sigModuleName, new List<IntPtr>());
+
+                sigListObj.Offsets.Add(sigModuleName, new List<IntPtr>());
             }
             else
             {
@@ -130,78 +168,11 @@ namespace SigScanner
                 SearchButton.PerformClick();
         }
 
-        private void imSearchCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            var checkBox = sender as CheckBox;
-
-            SearchButton.Text = checkBox.Checked ? "Refresh" : "Search";
-        }
-
-        private void ModuleNameTextBox_Enter(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (textBox.Text != "Scan all")
-                return;
-
-            textBox.Text = "";
-            textBox.ForeColor = SystemColors.WindowText;
-        }
-
-        private void ModuleNameTextBox_Leave(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (textBox.Text.Length != 0)
-                return;
-
-            textBox.Text = @"Scan all";
-            textBox.ForeColor = SystemColors.GrayText;
-        }
-
-        private void SigMaskTextBox_Enter(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (!textBox.Text.Equals(@"[xx??xx]"))
-                return;
-
-            textBox.Text = "";
-            textBox.ForeColor = SystemColors.WindowText;
-        }
-
-        private void SigMaskTextBox_Leave(object sender, EventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (textBox.Text.Any())
-                return;
-
-            textBox.Text = @"[xx??xx]";
-            textBox.ForeColor = SystemColors.GrayText;
-        }
-
-        private void SigMaskTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // disallow characters
-            if (!char.IsControl(e.KeyChar) /*&& e.KeyChar != (char)Keys.Back*/ && !Regex.IsMatch(e.KeyChar.ToString(), @"[x|?]"))
-            {
-                // TODO: show tooltip to notify usage of disallowed character?
-                e.Handled = true;
-            }
-        }
-
-        private void SigMaskTextBox_TextChanged(object sender, EventArgs e)
-        {
-            // TODO: prevent pasting of disallowed characters
-        }
-
         private void RemoveButton_Click(object sender, EventArgs e)
         {
             if (SigsTreeView.SelectedNode == null)
             {
-                MessageBox.Show("You need to select something first", "Error!",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.ShowError("You need to select something first");
                 return;
             }
 
@@ -243,6 +214,42 @@ namespace SigScanner
             _sigList.Clear();
 
             this.UpdateTreeView();
+        }
+
+        private void SearchButton_Click(object sender, EventArgs e)
+        {
+            if (!_sigList.Any())
+            {
+                Logger.ShowError("You have to add some Signatures first");
+                return;
+            }
+
+            if (!ProcNameTextBox.Text.Any())
+            {
+                Logger.ShowError("Process Name cannot be empty");
+                return;
+            }
+
+            if (_lastProcess == null || _lastProcess.Name != ProcNameTextBox.Text)
+                _lastProcess = new ProcessMemory(ProcNameTextBox.Text);
+            else
+            if (!_lastProcess.IsValid())
+                _lastProcess.Refresh();
+
+            if (!_lastProcess.IsValid())
+            {
+                _lastProcess.Dispose();
+                return;
+            }
+
+            Parallel.ForEach(_sigList, sig => {
+                _lastProcess.GetSignatureAddresses(sig);
+            });
+
+            this.UpdateTreeView();
+
+            // TODO: use ProgressBar instead to depict status
+            Logger.ShowDebug("Finished");
         }
 
         private void UpdateTreeView()
