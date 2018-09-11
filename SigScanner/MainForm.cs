@@ -100,12 +100,14 @@ namespace SigScanner
                 return;
             }
 
-            var sigListObj = _sigList.Where(x => string.Compare(x.Pattern, sigPattern, true) == 0).FirstOrDefault();
+            var sigListObj = _sigList.FirstOrDefault(x => String.Compare(x.Pattern, sigPattern,
+                                                              StringComparison.OrdinalIgnoreCase) == 0);
             if (sigListObj != null)
             {
                 if (sigListObj.Offsets.Keys.Contains(sigModuleName))
                 {
-                    MessageBox.Show("Sig with this Pattern already exists for this Module", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Sig with this Pattern already exists for this Module", "Error!",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 else
@@ -201,7 +203,8 @@ namespace SigScanner
         {
             if (SigsTreeView.SelectedNode == null)
             {
-                MessageBox.Show("You need to select something first", "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("You need to select something first", "Error!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -210,13 +213,13 @@ namespace SigScanner
 
             if (parentNode == null)
             {
-                var sigObj = _sigList.Where(x => x.Pattern.Equals(selectedNodeText)).FirstOrDefault();
+                var sigObj = _sigList.FirstOrDefault(x => x.Pattern.Equals(selectedNodeText));
                 if (sigObj != null)
                     _sigList.Remove(sigObj);
             }
             else if (selectedNodeText.StartsWith("0x"))
             {
-                var sigObj = _sigList.Where(x => x.Pattern.Equals(parentNode.Parent.Text)).FirstOrDefault();
+                var sigObj = _sigList.FirstOrDefault(x => x.Pattern.Equals(parentNode.Parent.Text));
                 if (sigObj != null)
                     if (sigObj.Offsets.TryGetValue(parentNode.Text, out var offsets))
                         offsets.Remove((IntPtr)(Environment.Is64BitProcess
@@ -225,7 +228,7 @@ namespace SigScanner
             }
             else
             {
-                var sigObj = _sigList.Where(x => x.Pattern.Equals(parentNode.Text)).FirstOrDefault();
+                var sigObj = _sigList.FirstOrDefault(x => x.Pattern.Equals(parentNode.Text));
                 if (sigObj != null)
                     if (sigObj.Offsets.ContainsKey(selectedNodeText))
                         sigObj.Offsets.Remove(selectedNodeText);
