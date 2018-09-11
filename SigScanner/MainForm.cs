@@ -24,12 +24,12 @@ namespace SigScanner
             _lastProcess = null;
             _sigList = new List<Signature>();
 
-            Text = $"Simple SigScanner - Build: {(Environment.Is64BitProcess ? "x64" : "x32")}";
+            Text = $@"Simple SigScanner - {(Environment.Is64BitProcess ? "x64" : "x32")} Build";
 
-            ModuleNameTextBox.Text = "Scan all";
+            ModuleNameTextBox.Text = @"Scan all";
             ModuleNameTextBox.ForeColor = SystemColors.GrayText;
 
-            SigMaskTextBox.Text = "xx????xxxx";
+            SigMaskTextBox.Text = @"[xx??xx]";
             SigMaskTextBox.ForeColor = SystemColors.GrayText;
         }
 
@@ -134,10 +134,7 @@ namespace SigScanner
         {
             var checkBox = sender as CheckBox;
 
-            if (checkBox.Checked)
-                SearchButton.Text = "Refresh";
-            else
-                SearchButton.Text = "Search";
+            SearchButton.Text = checkBox.Checked ? "Refresh" : "Search";
         }
 
         private void ModuleNameTextBox_Enter(object sender, EventArgs e)
@@ -158,7 +155,7 @@ namespace SigScanner
             if (textBox.Text.Length != 0)
                 return;
 
-            textBox.Text = "Scan all";
+            textBox.Text = @"Scan all";
             textBox.ForeColor = SystemColors.GrayText;
         }
 
@@ -166,7 +163,7 @@ namespace SigScanner
         {
             var textBox = sender as TextBox;
 
-            if (!textBox.Text.Equals(@"xx????xxxx"))
+            if (!textBox.Text.Equals(@"[xx??xx]"))
                 return;
 
             textBox.Text = "";
@@ -180,7 +177,7 @@ namespace SigScanner
             if (textBox.Text.Any())
                 return;
 
-            textBox.Text = @"xx????xxxx";
+            textBox.Text = @"[xx??xx]";
             textBox.ForeColor = SystemColors.GrayText;
         }
 
