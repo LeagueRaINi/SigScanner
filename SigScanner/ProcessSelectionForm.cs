@@ -67,14 +67,22 @@ namespace SigScanner
             this.UpdateListView(Process.GetProcesses());
         }
 
+		private void ProcessSelection_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (string.Equals((sender as Button)?.Name, @"CloseButton"))
+                this.SelectedProcess = null;
+        }
+		
         private void UpdateListView(IEnumerable<Process> procList)
         {
             ProcessListView.Items.Clear();
 
+			var filterText = FilterTextBox.Text.ToLower();
+			
             foreach (var proc in procList)
             {
                 if (!string.IsNullOrEmpty(FilterTextBox.Text))
-                    if (!proc.ProcessName.ToLower().Contains(FilterTextBox.Text.ToLower()))
+                    if (!proc.ProcessName.ToLower().Contains(filterText))
                         continue;
 
                 ProcessListView.Items.Add(new ListViewItem(new[]

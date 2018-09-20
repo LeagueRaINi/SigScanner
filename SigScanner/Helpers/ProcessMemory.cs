@@ -209,16 +209,9 @@ namespace SigScanner.Helpers
 
             var procSelectionForm = new ProcessSelectionForm(procList);
 
-            Process selectedProc = null;
-
-            procSelectionForm.Closing += (sender, args) =>
-            {
-                selectedProc = procSelectionForm.SelectedProcess;
-            };
-
             procSelectionForm.ShowDialog();
 
-            return selectedProc;
+            return procSelectionForm.SelectedProcess;
         }
 
         public static IntPtr OpenHandle(Process proc, Enums.ProcessAccessFlags accessFlags)

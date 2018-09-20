@@ -104,6 +104,7 @@
             this.MinimumSize = new System.Drawing.Size(259, 347);
             this.Name = "ProcessSelectionForm";
             this.Text = "Select Process";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ProcessSelection_FormClosing);
             this.SizeChanged += new System.EventHandler(this.ProcessSelectionForm_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
