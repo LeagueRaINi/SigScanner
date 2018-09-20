@@ -91,12 +91,10 @@ namespace SigScanner
 
         private void SigMaskTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (char.IsControl(e.KeyChar))
-                return;
-            if (Regex.IsMatch(e.KeyChar.ToString(), @"[x?]"))
+            if (char.IsControl(e.KeyChar) || Regex.IsMatch(e.KeyChar.ToString(), @"[x?]"))
                 return;
 
-            ErrorToolTip.Show("Only valid Characters like 'x' or '?' are allowed", SigMaskTextBox, 1000);
+            ErrorToolTip.Show("Only 'x' and '?' are allowed", SigMaskTextBox, 1000);
 
             e.Handled = true;
         }
@@ -112,7 +110,7 @@ namespace SigScanner
 
             textBox.Clear();
 
-            ErrorToolTip.Show("Only valid Characters like 'x' or '?' are allowed", textBox, 1000);
+            ErrorToolTip.Show("Only 'x' and '?' are allowed", textBox, 1000);
         }
 
         private void SigsTreeView_DoubleClick(object sender, EventArgs e)
@@ -136,7 +134,7 @@ namespace SigScanner
 
             if (sigPattern.Length < 5 || (SigMaskTextBox.Enabled && sigMask.Length < 5))
             {
-                Logger.ShowError("Sig Pattern or Mask is to small");
+                Logger.ShowError("Pattern or mask is too small");
                 return;
             }
 
@@ -145,7 +143,7 @@ namespace SigScanner
             {
                 if (sigListObj.Offsets.Keys.Contains(sigModuleName))
                 {
-                    Logger.ShowError("Sig with this Pattern already exists for this Module");
+                    Logger.ShowError("Sig with this pattern already exists for this module");
                     return;
                 }
 
@@ -220,13 +218,13 @@ namespace SigScanner
         {
             if (!_sigList.Any())
             {
-                Logger.ShowError("You have to add some Signatures first");
+                Logger.ShowError("No signatures to scan for");
                 return;
             }
 
             if (!ProcNameTextBox.Text.Any())
             {
-                Logger.ShowError("Process Name cannot be empty");
+                Logger.ShowError("Process name cannot be empty");
                 return;
             }
 
