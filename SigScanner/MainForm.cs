@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SigScanner.Helpers;
@@ -246,61 +247,86 @@ namespace SigScanner
                 return;
             }
 
-            Parallel.ForEach(_sigList, sig => {
-                _lastProcess.GetSignatureAddresses(sig);
+            Thread t = new Thread(delegate()
+            {
+                ProgressBar.Invoke((MethodInvoker) (() =>
+                {
+                    ProgressBar.Maximum = _sigList.Count;
+                    ProgressBar.Value = ProgressBar.Minimum;
+                }));
+
+                Parallel.ForEach(_sigList, sig => {
+                    _lastProcess.GetSignatureAddresses(sig);
+
+                    ProgressBar.Invoke((MethodInvoker)(() => ProgressBar.Increment(1)));
+                });
+
+                ScanFinished();
             });
 
-            this.UpdateTreeView();
+            t.Start();
 
-            // TODO: use ProgressBar instead to depict status
+        }
+
+        private void ScanFinished()
+        {
+            this.UpdateTreeView();
             Logger.ShowDebug("Finished");
         }
 
         private void UpdateTreeView()
         {
-            SigsTreeView.Nodes.Clear();
-
-            foreach (var sig in _sigList)
+            SigsTreeView.Invoke((MethodInvoker) (() =>
             {
-                var sigNode = new TreeNode(sig.Pattern);
+                SigsTreeView.Nodes.Clear();
 
-                foreach (var module in sig.Offsets)
+                foreach (var sig in _sigList)
                 {
-                    var moduleNode = new TreeNode(module.Key)
+                    var sigNode = new TreeNode(sig.Pattern);
+
+                    foreach (var module in sig.Offsets)
                     {
-                        ForeColor = module.Value.Count == 0
-                            ? Color.Red
-                            : module.Value.Count > 1
-                                ? Color.Orange
-                                : Color.Green
-                    };
+                        var moduleNode = new TreeNode(module.Key)
+                        {
+                            ForeColor = module.Value.Count == 0
+                                ? Color.Red
+                                : module.Value.Count > 1
+                                    ? Color.Orange
+                                    : Color.Green
+                        };
 
-                    foreach (var offset in module.Value)
-                        moduleNode.Nodes.Add($"0x{offset.ToString("X")}");
+                        foreach (var offset in module.Value)
+                            moduleNode.Nodes.Add($"0x{offset.ToString("X")}");
 
-                    sigNode.Nodes.Add(moduleNode);
+                        sigNode.Nodes.Add(moduleNode);
+                    }
+
+                    var emptyNodes = 0;
+                    var multipleAdressesNodes = 0;
+
+                    foreach (TreeNode node in sigNode.Nodes)
+                    {
+                        if (node.ForeColor.Equals(Color.Red))
+                            emptyNodes++;
+                        if (node.ForeColor.Equals(Color.Orange))
+                            multipleAdressesNodes++;
+                    }
+
+                    var sigNodesCount = sigNode.GetNodeCount(false);
+
+                    if (sigNodesCount != 0)
+                        sigNode.ForeColor = multipleAdressesNodes != 0
+                            ? Color.Orange
+                            : sigNodesCount == emptyNodes
+                                ? Color.Red
+                                : Color.Green;
+                    else
+                        sigNode.ForeColor = Color.DarkRed;
+
+                    SigsTreeView.Nodes.Add(sigNode);
                 }
+            }));
 
-                var emptyNodes = 0;
-                var multiplyAddressesNodes = 0;
-                foreach (TreeNode node in sigNode.Nodes)
-                {
-                    if (node.ForeColor.Equals(Color.Red))
-                        emptyNodes++;
-                    if (node.ForeColor.Equals(Color.Orange))
-                        multiplyAddressesNodes++;
-                }
-
-                var sigNodesCount = sigNode.GetNodeCount(false);
-                if (sigNodesCount != 0)
-                    sigNode.ForeColor = multiplyAddressesNodes != 0
-                        ? Color.Orange
-                        : sigNodesCount == emptyNodes
-                            ? Color.Red
-                            : Color.Green;
-
-                SigsTreeView.Nodes.Add(sigNode);
-            }
         }
     }
 }
