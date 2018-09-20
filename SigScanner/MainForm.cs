@@ -118,9 +118,15 @@ namespace SigScanner
             if (!(sender is TreeView treeView))
                 return;
 
-            Clipboard.SetText(treeView.SelectedNode.Text);
-
-            InfoToolTip.Show("Copied to Clipboard!", treeView, 500);
+            try
+            {
+                Clipboard.SetText(treeView.SelectedNode.Text);
+                InfoToolTip.Show("Copied to clipboard!", ActiveForm, PointToClient(MousePosition) - new Size(10, 40), 750);
+            }
+            catch (Exception exception)
+            {
+                Logger.ShowDebug(exception.ToString());
+            }
         }
 
         private void AddSigButton_Click(object sender, EventArgs e)
