@@ -153,7 +153,7 @@ namespace SigScanner
                     return;
                 }
 
-                sigListObj.Offsets.Add(sigModuleName, new List<IntPtr>());
+                //sigListObj.Offsets.Add(sigModuleName, new List<IntPtr>());
             }
             else
             {
@@ -161,7 +161,7 @@ namespace SigScanner
                 if (!sigInfo.IsValid())
                     return;
 
-                sigInfo.Offsets.Add(sigModuleName, new List<IntPtr>());
+                //sigInfo.Offsets.Add(sigModuleName, new List<IntPtr>());
 
                 _sigList.Add(sigInfo);
             }
