@@ -1,65 +1,95 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace SigScanner.Helpers
 {
+    /// <summary>
+    /// Pattern Scanning Implementation using the Boyer Moore Horspool Algorithm
+    /// </summary>
     public static class BoyerMooreHorspool
     {
-        public static List<IntPtr> FindPattern(byte[] moduleBuffer, Signature sig, IntPtr baseAddress)
+        /// <summary>
+        /// Searches for a Signature in the given Buffer
+        /// </summary>
+        /// <param name="moduleBuffer">Buffer to search the Pattern in</param>
+        /// <param name="sig">Signature to search in the Buffer</param>
+        /// <param name="baseAddress">Base Address that gets add to the Addresses</param>
+        /// <returns>Address Array</returns>
+        public static List<IntPtr> FindPattern(byte[] buffer, Signature sig, IntPtr baseAddress)
         {
-            var addressList = new List<IntPtr>();
-            if (!sig.IsValid() || moduleBuffer.Length < sig.Bytes.Count)
+            if (!sig.IsValid())
             {
-                Logger.ShowError("Could not find Pattern. Module Buffer was too small");
-                return addressList;
+                Logger.ShowError("Could not find Pattern. Signature is invalid");
+                return null;
             }
 
-            addressList.AddRange(moduleBuffer.Search(sig.Bytes.ToArray(), sig.MaskBool, sig.GetBadMatchingTable())
-                .Select(address => IntPtr.Add(baseAddress, address)));
-
-            return addressList;
-        }
-
-        private static int[] GetBadMatchingTable(this Signature sig)
-        {
-            var badMatchingTable = new int[256];
-            var lastPatternByteIndex = sig.Bytes.Count - 1;
-
-            var lastDiff = lastPatternByteIndex - Array.LastIndexOf(sig.MaskBool, false);
-            var firstDiff = lastPatternByteIndex - Array.IndexOf(sig.MaskBool, false);
-
-            var diff = firstDiff > lastDiff ? firstDiff : lastDiff;
-            if (diff == 0)
-                diff = 1;
-
-            for (var i = 0; i < 256; i++)
-                badMatchingTable[i] = diff;
-            for (var i = 0; i < lastPatternByteIndex; i++)
-                badMatchingTable[sig.Bytes[i] & 0xFF] = lastPatternByteIndex - i;
-
-            return badMatchingTable;
-        }
-
-        private static IEnumerable<int> Search(this IReadOnlyList<byte> haystack, IReadOnlyList<byte> needle, IReadOnlyList<bool> mask, IReadOnlyList<int> badMatchingTable)
-        {
-            var index = 0;
-            var lastPatternByteIndex = needle.Count - 1;
-            var addresses = new List<int>();
-
-            while (index <= haystack.Count - needle.Count)
+            if (buffer.Length < sig.Bytes.Count)
             {
-                for (var i = lastPatternByteIndex; haystack[index + i] == needle[i] || !mask[i]; --i)
-                    if (i == 0)
+                Logger.ShowError("Could not find Pattern. Module Buffer cannot be smaller than the Signature");
+                return null;
+            }
+
+            return sig.SearchPattern(buffer, baseAddress);
+        }
+
+        /// <summary>
+        /// Creates the Skip Table
+        /// </summary>
+        /// <param name="sig">Signature object</param>
+        /// <returns>Skip Table Array</returns>
+        private static int[] CreateMatchingsTable(this Signature sig)
+        {
+            var skipTable = new int[256];
+            var lastIndex = sig.Bytes.Count - 1;
+
+            // TODO:
+            // not the best way but it works for now
+            var diff = lastIndex - Math.Max(Array.LastIndexOf(sig.MaskBool, false), 0);
+            if (diff == 0)
+            {
+                diff = 1;
+            }
+
+            for (var i = 0; i < skipTable.Length; i++)
+            {
+                skipTable[i] = diff;
+            }
+
+            for (var i = lastIndex - diff; i < lastIndex; i++)
+            {
+                skipTable[sig.Bytes[i]] = lastIndex - i;
+            }
+
+            return skipTable;
+        }
+
+        /// <summary>
+        /// Searches for a Pattern in a Byte Array
+        /// </summary>
+        /// <param name="sig">Signature to search for</param>
+        /// <param name="data">Our Haystack</param>
+        /// <param name="baseAddress">Base Address that gets add to the Addresses</param>
+        /// <returns>List of Addresses it found</returns>
+        public static List<IntPtr> SearchPattern(this Signature sig, byte[] data, IntPtr baseAddress)
+        {
+            var patternLen = sig.Bytes.Count;
+            var lastPatternIndex = patternLen - 1;
+            var skipTable = sig.CreateMatchingsTable();
+            var adressList = new List<IntPtr>();
+
+            for (var i = 0; i <= data.Length - patternLen; i += Math.Max(skipTable[data[i + lastPatternIndex] & 0xFF], 1))
+            {
+                for (var j = lastPatternIndex; !sig.MaskBool[j] || data[i + j] == sig.Bytes[j]; --j)
+                {
+                    if (j == 0)
                     {
-                        addresses.Add(index);
+                        adressList.Add(IntPtr.Add(baseAddress, i));
                         break;
                     }
-
-                index += badMatchingTable[haystack[index + lastPatternByteIndex] & 0xFF];
+                }
             }
 
-            return addresses;
+            return adressList;
         }
     }
 }
