@@ -37,6 +37,8 @@ namespace SigScanner
                 return;
 
             SigMaskTextBox.Enabled = textBox.Text.Contains(@"\x");
+
+            InfoToolTip.SetToolTip(label4, SigMaskTextBox.Enabled ? "" : "This signature format does not need a mask.");
         }
 
         private void InstantSearchCheckBox_CheckedChanged(object sender, EventArgs e)
